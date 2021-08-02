@@ -1,0 +1,7 @@
+if(DESKTOP_BUILD)
+    add_subdirectory(desktop)
+elseif(NATIVE_MACOS_BUILD)
+    add_subdirectory(macos_native)
+elseif(ANDROID_BUILD)
+    add_subdirectory(android)
+endif()
