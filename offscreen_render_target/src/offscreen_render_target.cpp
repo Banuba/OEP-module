@@ -2,7 +2,12 @@
 
 #include "opengl.hpp"
 
-#include <bnb/effect_player.h>
+#include <preprocessor/build_macros.hpp>
+#if C_API
+    #include <bnb/effect_player.h>
+#elif CPP_API
+    #include <bnb/effect_player/utility.hpp>
+#endif
 
 namespace bnb
 {
@@ -30,7 +35,7 @@ namespace bnb
     class ort_frame_surface_handler
     {
     private:
-        static const auto v_size = static_cast<uint32_t>(BNB_DEG_270) + 1;
+        static const auto v_size = static_cast<uint32_t>(BNB_DEG_270_ALIAS) + 1;
 
     public:
         /**
@@ -40,7 +45,7 @@ namespace bnb
         */
         static const float vertices[2][v_size][5 * 4];
 
-        explicit ort_frame_surface_handler(bnb_image_orientation_t orientation, bool is_y_flip)
+        explicit ort_frame_surface_handler(bnb_image_orientation_alias orientation, bool is_y_flip)
             : m_orientation(static_cast<uint32_t>(orientation))
             , m_y_flip(static_cast<uint32_t>(is_y_flip))
         {
@@ -108,7 +113,7 @@ namespace bnb
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
 
-        void set_orientation(bnb_image_orientation_t orientation)
+        void set_orientation(bnb_image_orientation_alias orientation)
         {
             if (m_orientation != static_cast<uint32_t>(orientation)) {
                 m_orientation = static_cast<uint32_t>(orientation);
@@ -240,7 +245,7 @@ namespace bnb
             GL_CALL(glGenFramebuffers(1, &m_post_processing_framebuffer));
 
             m_program = std::make_unique<program>("OrientationChange", vs_default_base, ps_default_base);
-            m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(BNB_DEG_0, false);
+            m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(BNB_DEG_0_ALIAS, false);
         });
 
         deactivate_context();
@@ -272,16 +277,14 @@ namespace bnb
         m_width = width;
         m_height = height;
 
-        m_renderer_context.reset();
-
-        auto create_context_task = [this]() {
+        auto set_window_size = [this]() {
             glfwSetWindowSize(m_renderer_context.get(), m_width, m_height);
         };
 
         #ifdef __APPLE__
-            run_on_main_queue(create_context_task);
+            run_on_main_queue(set_window_size);
         #else
-            create_context_task();
+            set_window_size();
         #endif
 
         activate_context();
@@ -316,12 +319,19 @@ namespace bnb
 
     void offscreen_render_target::load_glad_functions()
     {
+    #if C_API
         bnb_error* error = nullptr;
         bnb_effect_player_load_glad_functions((void*)glfwGetProcAddress, &error);
         if (error) {
             bnb_error_destroy(error);
             throw std::runtime_error("gladLoadGLLoader error");
         }
+    #elif CPP_API
+        #if BNB_OS_WINDOWS || BNB_OS_MACOS
+            // it's only need for use while working with dynamic libs
+            utility::load_glad_functions((GLADloadproc) glfwGetProcAddress);
+        #endif
+    #endif
 
         if (0 == gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
             throw std::runtime_error("gladLoadGLLoader error");
@@ -382,7 +392,7 @@ namespace bnb
     {
         GL_CALL(glFlush());
 
-        if (orient.orientation == BNB_DEG_0 && !orient.is_y_flip) {
+        if (orient.orientation == BNB_DEG_0_ALIAS && !orient.is_y_flip) {
             return;
         }
 

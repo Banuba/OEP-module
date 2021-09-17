@@ -30,7 +30,7 @@ namespace bnb::render
 {
     renderer::renderer(int width, int height)
         : m_program("RendererCamera", vs, fs)
-        , m_frame_surface(BNB_DEG_0, false)
+        , m_frame_surface(BNB_DEG_0_ALIAS, false)
     {
         surface_change(width, height);
     }

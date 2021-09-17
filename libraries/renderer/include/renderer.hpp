@@ -1,19 +1,12 @@
 #pragma once
 
-// #include <bnb/types/full_image.hpp>
+#include <c_api/c_api_cpp_api_diff.hpp>
 
 #include "program.hpp"
 #include "frame_surface_handler.hpp"
 
 namespace bnb::render
 {
-/*
-    struct nv12_planes
-    {
-        color_plane y_plane;
-        color_plane uv_plane;
-    };
-*/
     class renderer
     {
     public:

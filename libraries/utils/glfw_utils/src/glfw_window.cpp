@@ -1,9 +1,17 @@
 #include "glfw_window.hpp"
 
-#include <bnb/effect_player.h>
-#include "defs.hpp"
+#include <c_api/c_api_cpp_api_diff.hpp>
+#if C_API
+    #include <bnb/effect_player.h>
+    #include "defs.hpp"
+#elif CPP_API
+    #include <bnb/effect_player/utility.hpp>
+    #include <bnb/utils/defs.hpp>
+    using namespace bnb;
+#endif
 
 #include <glad/glad.h>
+
 
 glfw_window::glfw_window(const std::string& title, GLFWwindow* share)
 {
@@ -31,13 +39,21 @@ glfw_window::~glfw_window()
     glfwTerminate();
 }
 
+void glfw_window::set_resize_callback(std::function<void(int32_t w, int32_t h, int32_t w_glfw_buffer, int32_t h_glfw_buffer)> surface_changed)
+{
+    surface_changed_callback = surface_changed;
+}
+
 void glfw_window::show(uint32_t width_hint, uint32_t height_hint)
 {
+    window_width = width_hint;
+    window_height = height_hint;
+
     async::spawn(
         m_scheduler,
         [this, width_hint, height_hint]() {
             glfwSetWindowSize(m_window, width_hint, height_hint);
-            glfwSetWindowPos(m_window, 0, 0);
+            glfwSetWindowPos(m_window, 100, 100);
             glfwShowWindow(m_window);
         });
 
@@ -49,6 +65,13 @@ void glfw_window::run_main_loop()
     while (!glfwWindowShouldClose(m_window)) {
         glfwWaitEvents();
         m_scheduler.run_all_tasks();
+
+        if (surface_changed_callback && resized) {
+            int32_t buffer_width, buffer_height;
+            glfwGetFramebufferSize(m_window, &buffer_width, &buffer_height);
+            surface_changed_callback(window_width, window_height, buffer_width, buffer_height);
+            resized = false;
+        }
     }
 }
 
@@ -67,7 +90,7 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
 
     glfwWindowHint(GLFW_DEPTH_BITS, 0);
     glfwWindowHint(GLFW_STENCIL_BITS, 0);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -102,16 +125,30 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
     if (nullptr == m_window) {
         throw std::runtime_error("glfwCreateWindow error");
     }
+
+    glfwSetWindowSizeCallback(m_window, [](GLFWwindow*, int w, int h) {
+        glViewport(0, 0, w, h);
+        window_width = w;
+        window_height = h;
+        resized = true;
+    });
 }
 
 void glfw_window::load_glad_functions()
 {
+#if C_API
     bnb_error* error = nullptr;
     bnb_effect_player_load_glad_functions((void*)glfwGetProcAddress, &error);
     if (error) {
         bnb_error_destroy(error);
         throw std::runtime_error("gladLoadGLLoader error");
     }
+#elif CPP_API
+    #if BNB_OS_WINDOWS || BNB_OS_MACOS
+        // it's only need for use while working with dynamic libs
+        utility::load_glad_functions((GLADloadproc) glfwGetProcAddress);
+    #endif
+#endif
 
     if (0 == gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         throw std::runtime_error("gladLoadGLLoader error");

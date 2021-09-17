@@ -1,24 +1,23 @@
 #pragma once
 
-#include <bnb/effect_player.h>
-
-#include "formats.hpp"
-#include "nv12_image.hpp"
-#include "offscreen_render_target.hpp"
-#include "pixel_buffer.hpp"
+#include <interfaces/c_api/c_api_only.hpp>
+#include <interfaces/formats.hpp>
+#include <interfaces/offscreen_render_target.hpp>
+#include <interfaces/pixel_buffer.hpp>
 
 
 namespace bnb {
 
     using oep_pb_ready_cb = std::function<void(std::optional<ipb_sptr>)>;
 
-namespace interfaces {
+namespace interfaces
+{
     class offscreen_effect_player
     {
     public:
         static std::shared_ptr<offscreen_effect_player> create(
-                const std::vector<std::string>& path_to_resources, const std::string& client_token,
-                int32_t width, int32_t height, bool manual_audio, iort_sptr ort);
+            const std::vector<std::string>& path_to_resources, const std::string& client_token,
+            int32_t width, int32_t height, bool manual_audio, iort_sptr ort);
 
         virtual ~offscreen_effect_player() = default;
 
@@ -26,18 +25,14 @@ namespace interfaces {
          * An asynchronous method for passing a frame to effect player,
          * and calling callback as a frame will be processed
          *
-         * @param image full_image_t - containing a frame for processing
+         * @param image full_image_t - containing a frame for processing 
          * @param callback calling when frame will be processed, containing pointer of pixel_buffer for get bytes
-         * @param target_orient
+         * @param target_orient 
          *
          * Example process_image_async(image_sptr, [](ipb_sptr sptr){})
          */
-        virtual void process_image_async(std::shared_ptr<nv12_image> image, oep_pb_ready_cb callback,
+        virtual void process_image_async(std::shared_ptr<image_type_alias> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
-
-        virtual ipb_sptr process_image(
-                std::shared_ptr<rgb_image> image,
-                std::optional<orient_format> target_orient = std::nullopt) = 0;
 
         /**
          * Notify about rendering surface being resized.

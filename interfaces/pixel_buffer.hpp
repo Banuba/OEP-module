@@ -1,22 +1,13 @@
 #pragma once
 
-#include <functional>
-#include <memory>
+#include <interfaces/c_api/c_api_only.hpp>
 #include <optional>
 
-#include "nv12_image.hpp"
-#include "rgb_image.hpp"
-
-using oep_image_ready_cb_nv12 = std::function<void(std::optional<nv12_image> image)>;
-using oep_image_ready_cb_argb = std::function<void(std::optional<rgb_image> image)>;
+using oep_image_ready_cb = std::function<void(std::optional<image_type_alias> image)>;
 using oep_texture_cb = std::function<void(std::optional<int> texture_id)>;
 
-inline color_plane color_plane_weak(const color_plane_data_t* ptr)
+namespace bnb::interfaces
 {
-    return color_plane(const_cast<color_plane_data_t*>(ptr), [](color_plane_data_t*) { /* DO NOTHING */ });
-}
-
-namespace bnb::interfaces {
     class pixel_buffer
     {
     public:
@@ -55,9 +46,7 @@ namespace bnb::interfaces {
          *
          * Example process_image_async([](std::optional<full_image_t> image){})
          */
-        virtual void get_rgba_async(oep_image_ready_cb_argb callback) = 0;
-
-        virtual std::optional<rgb_image> get_rgba() = 0;
+        virtual void get_rgba(oep_image_ready_cb callback) = 0;
 
         /**
          * In thread with active texture get pixel bytes from Offscreen_render_target and
@@ -67,7 +56,7 @@ namespace bnb::interfaces {
          *
          * Example process_image_async([](std::optional<full_image_t> image){})
          */
-        virtual void get_nv12(oep_image_ready_cb_nv12 callback) = 0;
+        virtual void get_nv12(oep_image_ready_cb callback) = 0;
 
         /**
          * Returns texture id of texture used to render frame. Can be used to render with
@@ -79,6 +68,6 @@ namespace bnb::interfaces {
          */
         virtual void get_texture(oep_texture_cb callback) = 0;
     };
-} // bnb::interfaces
+} /* bnb::interfaces */
 
 using ipb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;

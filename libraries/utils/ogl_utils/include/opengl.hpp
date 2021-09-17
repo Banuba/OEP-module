@@ -1,8 +1,15 @@
 #pragma once
 
-#include <GLES3/gl3.h>
+#include <glad/glad.h>
+#define BNB_GL
 
-#include "singleton.hpp"
+#include <c_api/c_api_cpp_api_diff.hpp>
+#if C_API
+    #include <utility>
+    #include "singleton.hpp"
+#elif CPP_API
+    #include <bnb/utils/singleton.hpp>
+#endif
 
 namespace bnb::gl
 {

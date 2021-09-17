@@ -2,8 +2,9 @@
 #include "offscreen_render_target.hpp"
 
 #include <iostream>
-#include <utility>
 
+#include <preprocessor/build_macros.hpp>
+#if C_API
 #define CHECK_ERROR(error)                                  \
     do {                                                    \
         if (error) {                                        \
@@ -12,11 +13,13 @@
             throw std::runtime_error(msg);                  \
         }                                                   \
     } while (false);
+#endif /* C_API */
 
-namespace bnb {
+namespace bnb
+{
     ioep_sptr interfaces::offscreen_effect_player::create(
-            const std::vector<std::string>& path_to_resources, const std::string& client_token,
-            int32_t width, int32_t height, bool manual_audio, iort_sptr ort)
+        const std::vector<std::string>& path_to_resources, const std::string& client_token,
+        int32_t width, int32_t height, bool manual_audio, iort_sptr ort)
     {
         if (ort == nullptr) {
             return nullptr;
@@ -31,9 +34,24 @@ namespace bnb {
         const std::vector<std::string>& path_to_resources, const std::string& client_token,
         int32_t width, int32_t height, bool manual_audio,
         iort_sptr offscreen_render_target)
+
+#if C_API
             : m_ort(offscreen_render_target)
             , m_scheduler(1)
+#elif CPP_API
+            : m_utility(path_to_resources, client_token)
+            , m_ep(bnb::interfaces::effect_player::create( {
+                width, height,
+                bnb::interfaces::nn_mode::automatically,
+                bnb::interfaces::face_search_mode::good,
+                false, manual_audio }))
+            , m_ort(offscreen_render_target)
+            , m_scheduler(1)
+#endif /* CPP_API */
+
     {
+
+#if C_API
         std::unique_ptr<const char* []> res_paths = std::make_unique<const char* []>(path_to_resources.size() + 1);
         std::transform(path_to_resources.begin(), path_to_resources.end(), res_paths.get(), [](const auto& s) { return s.c_str(); });
         res_paths.get()[path_to_resources.size()] = nullptr;
@@ -44,12 +62,16 @@ namespace bnb {
         if (m_ep == nullptr) {
             throw std::runtime_error("Failed to create effect player holder.");
         }
+#endif /* C_API */
+
         // MacOS GLFW requires window creation on main thread, so it is assumed that we are on main thread.
         auto task = [this, width, height]() {
             render_thread_id = std::this_thread::get_id();
             m_ort->init();
             m_ort->activate_context();
-            bnb_effect_player_surface_created(m_ep, width, height, nullptr);
+
+            IF_C_API(bnb_effect_player_surface_created(m_ep, width, height, nullptr));     
+            IF_CPP_API(m_ep->surface_created(width, height));
 #ifdef WIN32 // Only necessary if we want share context via GLFW on Windows
             m_ort->deactivate_context();
 #endif
@@ -68,17 +90,21 @@ namespace bnb {
 
     offscreen_effect_player::~offscreen_effect_player()
     {
-        bnb_effect_player_surface_destroyed(m_ep, nullptr);
+        IF_C_API(bnb_effect_player_surface_destroyed(m_ep, nullptr));
+        IF_CPP_API(m_ep->surface_destroyed());
+
         // Deinitialize offscreen render target, should be performed on render thread.
         auto task = [this]() {
             m_ort->deinit();
         };
         m_scheduler.enqueue(task).get();
-        bnb_effect_player_destroy(m_ep, nullptr);
-        bnb_utility_manager_release(m_utility, nullptr);
+        
+        IF_C_API(bnb_effect_player_destroy(m_ep, nullptr));
+        IF_C_API(bnb_utility_manager_release(m_utility, nullptr));
+        
     }
 
-    void offscreen_effect_player::process_image_async(std::shared_ptr<nv12_image> image, oep_pb_ready_cb callback,
+    void offscreen_effect_player::process_image_async(std::shared_ptr<image_type_alias> image, oep_pb_ready_cb callback,
                                                       std::optional<interfaces::orient_format> target_orient)
     {
         if (m_current_frame == nullptr) {
@@ -104,6 +130,7 @@ namespace bnb {
                 m_ort->activate_context();
                 m_ort->prepare_rendering();
 
+#if C_API
                 bnb_error* error = nullptr;
                 full_image_holder_t* img = bnb_full_image_from_yuv_nv12_img(
                     image->get_format(),
@@ -112,7 +139,7 @@ namespace bnb {
                     &error);
                 CHECK_ERROR(error);
                 if (!img) {
-                    throw std::runtime_error("No image was created");
+                    throw std::runtime_error("no image was created");
                 }
                 bnb_effect_player_push_frame(m_ep, img, &error);
                 CHECK_ERROR(error);
@@ -122,6 +149,13 @@ namespace bnb {
                     std::this_thread::yield();
                 }
                 CHECK_ERROR(error);
+#elif CPP_API
+                m_ep->push_frame(std::move(*image));
+                while (m_ep->draw() < 0) {
+                    std::this_thread::yield();
+                }
+#endif /* CPP_API */
+
                 m_ort->orient_image(*target_orient);
                 callback(m_current_frame);
                 m_current_frame->unlock();
@@ -135,54 +169,19 @@ namespace bnb {
         m_scheduler.enqueue(task);
     }
 
-
-    ipb_sptr offscreen_effect_player::process_image(
-        std::shared_ptr<rgb_image> image,
-        std::optional<interfaces::orient_format> target_orient)
-    {
-        if (m_current_frame == nullptr) {
-            m_current_frame = std::make_shared<pixel_buffer>(shared_from_this(),
-                image->get_i_format().width, image->get_i_format().height, image->get_i_format().orientation);
-        }
-
-        if (!target_orient.has_value()) {
-            target_orient = {image->get_i_format().orientation, true};
-        }
-
-        auto task = [this, image, target_orient]() {
-            m_ort->activate_context();
-            m_ort->prepare_rendering();
-
-            bnb_error* error = nullptr;
-            full_image_holder_t* img = bnb_full_image_from_bpc8_img(
-                    image->get_i_format(), image->get_p_format(), image->get_data(), image->get_stride(), &error);
-            CHECK_ERROR(error);
-            if (!img) {
-                throw std::runtime_error("No image was created");
-            }
-
-            bnb_effect_player_push_frame(m_ep, img, &error);
-            CHECK_ERROR(error);
-            bnb_full_image_release(img, nullptr);
-
-            while (bnb_effect_player_draw(m_ep, &error) < 0) {
-                std::this_thread::yield();
-            }
-            CHECK_ERROR(error);
-            m_ort->orient_image(*target_orient);
-            return m_current_frame;
-       };
-       return m_scheduler.enqueue(task).get();
-    }
-
     void offscreen_effect_player::surface_changed(int32_t width, int32_t height)
     {
         auto task = [this, width, height]() {
             m_ort->activate_context();
 
+#if C_API
             bnb_effect_player_surface_changed(m_ep, width, height, nullptr);
             effect_manager_holder_t* em = bnb_effect_player_get_effect_manager(m_ep, nullptr);
             bnb_effect_manager_set_effect_size(em, width, height, nullptr);
+#elif CPP_API
+            m_ep->surface_changed(width, height);
+            m_ep->effect_manager()->set_effect_size(width, height);
+#endif /* CPP_API */
 
             m_current_frame.reset();
             m_ort->surface_changed(width, height);
@@ -191,16 +190,25 @@ namespace bnb {
         m_scheduler.enqueue(task);
     }
 
-    void offscreen_effect_player::load_effect(const std::string &effect_path)
+    void offscreen_effect_player::load_effect(const std::string& effect_path)
     {
         auto task = [this, effect = effect_path]() {
             m_ort->activate_context();
 
+#if C_API
             if (auto e_manager = bnb_effect_player_get_effect_manager(m_ep, nullptr)) {
                 bnb_effect_manager_load_effect(e_manager, effect.c_str(), nullptr);
             } else {
                 std::cout << "[Error] effect manager not initialized" << std::endl;
             }
+#elif CPP_API
+            if (auto e_manager = m_ep->effect_manager()) {
+                e_manager->load(effect);
+            } else {
+                std::cout << "[Error] effect manager not initialized" << std::endl;
+            }
+#endif /* CPP_API */
+
         };
 
         m_scheduler.enqueue(task);
@@ -213,24 +221,28 @@ namespace bnb {
 
     void offscreen_effect_player::pause()
     {
-        bnb_effect_player_playback_pause(m_ep, nullptr);
+        IF_C_API( bnb_effect_player_playback_pause(m_ep, nullptr) );
+        IF_CPP_API( m_ep->playback_pause() );
     }
 
     void offscreen_effect_player::resume()
     {
-        bnb_effect_player_playback_play(m_ep, nullptr);
+        IF_C_API( bnb_effect_player_playback_play(m_ep, nullptr) );
+        IF_CPP_API( m_ep->playback_play() );
     }
 
     void offscreen_effect_player::enable_audio(bool enable)
     {
-        bnb_effect_player_enable_audio(m_ep, enable, nullptr);
+        IF_C_API( bnb_effect_player_enable_audio(m_ep, enable, nullptr) );
+        IF_CPP_API( m_ep->enable_audio(enable) );
     }
 
-    void offscreen_effect_player::call_js_method(const std::string &method, const std::string &param)
+    void offscreen_effect_player::call_js_method(const std::string& method, const std::string& param)
     {
         auto task = [this, method = method, param = param]() {
             m_ort->activate_context();
 
+#if C_API
             if (auto e_manager = bnb_effect_player_get_effect_manager(m_ep, nullptr)) {
                 if (auto effect = bnb_effect_manager_get_current_effect(e_manager, nullptr)) {
                     bnb_effect_call_js_method(effect, method.c_str(), param.c_str(), nullptr);
@@ -242,12 +254,25 @@ namespace bnb {
             else {
                 std::cout << "[Error] effect manager not initialized" << std::endl;
             }
+#elif CPP_API
+            if (auto e_manager = m_ep->effect_manager()) {
+                if (auto effect = e_manager->current()) {
+                    effect->call_js_method(method, param);
+                }
+                else {
+                    std::cout << "[Error] effect not loaded" << std::endl;
+                }
+            }
+            else {
+                std::cout << "[Error] effect manager not initialized" << std::endl;
+            }
+#endif /* CPP_API */
         };
 
         m_scheduler.enqueue(task);
     }
 
-    void offscreen_effect_player::read_current_buffer_async(std::function<void(bnb::data_t data)> callback)
+    void offscreen_effect_player::read_current_buffer(std::function<void(bnb::data_t data)> callback)
     {
         if (std::this_thread::get_id() == render_thread_id) {
             callback(m_ort->read_current_buffer());
@@ -261,17 +286,6 @@ namespace bnb {
             }
         };
         m_scheduler.enqueue(task);
-    }
-
-    bnb::data_t offscreen_effect_player::read_current_buffer()
-    {
-        if (std::this_thread::get_id() == render_thread_id) {
-            return m_ort->read_current_buffer();
-        }
-        auto task = [this]() {
-            return this->m_ort->read_current_buffer();
-        };
-        return m_scheduler.enqueue(task).get();
     }
 
     void offscreen_effect_player::get_current_buffer_texture(oep_texture_cb callback)
@@ -289,5 +303,6 @@ namespace bnb {
         };
         m_scheduler.enqueue(task);
     }
+
 
 } // bnb
