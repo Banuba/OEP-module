@@ -7,7 +7,8 @@ add_library(camera STATIC ${srcs})
 target_include_directories(camera PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/include/
     ${CMAKE_CURRENT_LIST_DIR}
-    ${PROJECT_SOURCE_DIR}
+    ${OEP_SUBMODULE_DIR}/
+    ${PROJECT_SOURCE_DIR}/
 )
 
 if (APPLE)

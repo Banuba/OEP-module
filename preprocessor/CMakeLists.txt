@@ -4,6 +4,6 @@ option(ANDROID_BUILD_PART       "Build for android"     ${ANDROID_BUILD})
 option(C_API_BUILD_PART         "c-api or cpp-api"      ${BUILD_C_API})
 
 configure_file(
-    "${PROJECT_SOURCE_DIR}/preprocessor/config.hpp.in"
-    "${PROJECT_SOURCE_DIR}/preprocessor/config.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/config.hpp.in"
+    "${CMAKE_CURRENT_LIST_DIR}/config.hpp"
 )

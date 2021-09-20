@@ -1,6 +1,7 @@
 set(include_dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    ${PROJECT_SOURCE_DIR}/libraries/
+    ${OEP_SUBMODULE_DIR}/libraries/
+    ${OEP_SUBMODULE_DIR}/
     ${PROJECT_SOURCE_DIR}/
 )
 
