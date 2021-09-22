@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "interfaces/nv12_image.hpp"
+#include <interfaces/c_api/nv12_image.hpp>
 
 namespace bnb
 {

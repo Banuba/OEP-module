@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <bnb/common_types.h>
+#include <c_api/c_api_cpp_api_diff.hpp>
 
 #include "opengl.hpp"
 #include <algorithm>
@@ -13,7 +13,7 @@ namespace bnb::render
     class frame_surface_handler
     {
     private:
-        static const auto v_size = static_cast<uint32_t>(BNB_DEG_270) + 1;
+        static const auto v_size = static_cast<uint32_t>(BNB_DEG_270_ALIAS) + 1;
 
     public:
         /**
@@ -23,7 +23,7 @@ namespace bnb::render
         */
         static const float vertices[2][v_size][5 * 4];
 
-        explicit frame_surface_handler(bnb_image_orientation_t orientation, bool is_y_flip)
+        explicit frame_surface_handler(bnb_image_orientation_alias orientation, bool is_y_flip)
             : m_orientation(static_cast<uint32_t>(orientation))
             , m_y_flip(static_cast<uint32_t>(is_y_flip))
         {
@@ -84,7 +84,7 @@ namespace bnb::render
         frame_surface_handler& operator=(const frame_surface_handler&) = delete;
         frame_surface_handler& operator=(frame_surface_handler&&) = delete;
 
-        void set_orientation(bnb_image_orientation_t orientation)
+        void set_orientation(bnb_image_orientation_alias orientation)
         {
             if (m_orientation != static_cast<uint32_t>(orientation)) {
                 m_orientation = static_cast<uint32_t>(orientation);

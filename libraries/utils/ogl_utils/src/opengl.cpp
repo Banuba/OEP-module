@@ -1,4 +1,4 @@
-// #include <bnb/utils/singleton.hpp>
+
 
 #ifndef BNB_WRITE_LOG_MESSAGE
     #define WRITE_LOG_MESSAGE(severity, message) std::cout << #severity << message << std::endl

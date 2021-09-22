@@ -1,26 +1,10 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
+#include <interfaces/c_api/c_api_only.hpp>
+#include <interfaces/formats.hpp>
 
-#include <functional>
-#include <memory>
-
-#include "formats.hpp"
-
-
-namespace bnb {
-    struct data_t
-    {
-        using type = uint8_t[];
-        using pointer = uint8_t*;
-        using uptr = std::unique_ptr<type, std::function<void(pointer)>>;
-        uptr data;
-        size_t size;
-    };
-} // bnb
-
-namespace bnb::interfaces {
+namespace bnb::interfaces
+{
     // Opaque value, used only to make GL resources sharing between contexts
     using oep_sharing_context = void*;
 
@@ -93,7 +77,7 @@ namespace bnb::interfaces {
          *
          * @return a data_t with bytes of the processed frame 
          *
-         * Example read_current_buffer_async()
+         * Example read_current_buffer()
          */
         virtual bnb::data_t read_current_buffer() = 0;
 
