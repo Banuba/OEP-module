@@ -15,7 +15,6 @@ function(copy_sdk target)
                 COMMENT "Copy banuba dynamic libs"
             )
         else()
-            set(SDK_POSTPROCESS_LIB "bnb_postprocess")
             set(SDK_EFFECT_PLAYER_LIB "bnb_effect_player")
 
             add_custom_command(
@@ -23,7 +22,6 @@ function(copy_sdk target)
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 $<TARGET_PROPERTY:bnb_effect_player,INTERFACE_BIN_DIR>/$<CONFIG>/${SDK_EFFECT_PLAYER_LIB}.${SDK_FILE_TYPE}
-                $<TARGET_PROPERTY:bnb_effect_player,INTERFACE_BIN_DIR>/$<CONFIG>/${SDK_POSTPROCESS_LIB}.${SDK_FILE_TYPE}
                 $<TARGET_FILE_DIR:${target}>
             COMMENT "Copy banuba dynamic libs"
         )
