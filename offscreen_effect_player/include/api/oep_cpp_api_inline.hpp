@@ -11,7 +11,7 @@ namespace bnb::api
 
 /* oep_api::oep_api     CONSTRUCTOR */
 inline oep_api::oep_api(const std::vector<std::string>& path_to_resources, const std::string& client_token)
-        : m_utilit(path_to_resources, client_token)
+        : m_utility(path_to_resources, client_token)
 {
 }
 
