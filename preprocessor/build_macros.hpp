@@ -2,6 +2,12 @@
 
 #include "config.hpp"
 
+#ifdef DEBUG
+    #define ONLY_DEBUG(expr)        expr
+#else
+    #define ONLY_DEBUG(expr)        ((void)0)
+#endif
+
 /* desktop build */
 #if defined(DESKTOP_BUILD_PART)
     #define IF_DESKTOP(expr)        expr
