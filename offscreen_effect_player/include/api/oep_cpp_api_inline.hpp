@@ -15,6 +15,11 @@ inline oep_api::oep_api(const std::vector<std::string>& path_to_resources, const
 {
 }
 
+/* oep_api::~oep_api    DESTRUCTOR */
+inline oep_api::~oep_api()
+{
+}
+
 /* oep_api::pause */
 inline void oep_api::pause()
 {
@@ -40,11 +45,6 @@ inline void oep_api::init(int32_t width, int32_t height, bool manual_audio)
             width, height, bnb::interfaces::nn_mode::automatically,
             bnb::interfaces::face_search_mode::good, false, manual_audio } )
     );
-}
-
-/* oep_api::deinit */
-inline void oep_api::deinit()
-{
 }
 
 /* oep_api::surface_created */

@@ -14,10 +14,10 @@ namespace bnb::api
 
 class oep_api
 {
-public:
-                oep_api(const std::vector<std::string>& path_to_resources, const std::string& client_token);
-
 protected:
+                oep_api(const std::vector<std::string>& path_to_resources, const std::string& client_token);
+                ~oep_api();
+
     void        pause();
     void        resume();
     void        enable_audio(bool enable);

@@ -29,13 +29,20 @@
     #define IF_ANDROID(expr)
 #endif
 
+/* win32 build */
+#if defined(WIN32)
+    #define ONLY_WIN32(expr)        expr
+#else
+    #define ONLY_WIN32(expr)        ((void)0)
+#endif /* defined(WIN32) */
+
 /* c-api build */
 #if defined(C_API_BUILD_PART)
     #define IF_C_API(expr)          expr
     #define IF_CPP_API(expr)
     #define C_API                   1
     #define CPP_API                 0
-#else
+#else /* cpp-api build */
     #define IF_C_API(expr)
     #define IF_CPP_API(expr)        expr
     #define C_API                   0

@@ -21,7 +21,7 @@ ioep_sptr interfaces::offscreen_effect_player::create(
             path_to_resources, client_token, width, height, manual_audio, ort));
 }
 
-/* offscreen_effect_player::offscreen_effect_player */
+/* offscreen_effect_player::offscreen_effect_player     CONSTRUCTOR */
 offscreen_effect_player::offscreen_effect_player(
         const std::vector<std::string>& path_to_resources, const std::string& client_token,
         int32_t width, int32_t height, bool manual_audio,
@@ -40,9 +40,8 @@ offscreen_effect_player::offscreen_effect_player(
         m_ort->activate_context();
 
         oep_api::surface_created(width, height);
-#ifdef WIN32 // Only necessary if we want share context via GLFW on Windows
-        m_ort->deactivate_context();
-#endif
+        /* Only necessary if we want share context via GLFW on Windows */
+        ONLY_WIN32(m_ort->deactivate_context());
     };
 
     auto future = m_scheduler.enqueue(task);
@@ -66,8 +65,6 @@ offscreen_effect_player::~offscreen_effect_player()
         m_ort->deinit();
     };
     m_scheduler.enqueue(task).get();
-    
-    oep_api::deinit();
 }
 
 /* offscreen_effect_player::process_image_async */
@@ -87,13 +84,13 @@ void offscreen_effect_player::process_image_async(
     }
 
     if (!target_orient.has_value()) {
+        /* set default orientation */
         target_orient = { image->get_format().orientation, true };
     }
 
     auto task = [this, image, callback, target_orient]() {
         if (m_incoming_frame_queue_task_count == 1) {
             m_current_frame->lock();
-
             m_ort->activate_context();
             m_ort->prepare_rendering();
             oep_api::draw_image(image);
@@ -123,7 +120,6 @@ void offscreen_effect_player::surface_changed(int32_t width, int32_t height)
     m_scheduler.enqueue(task);
 }
 
-
 /* offscreen_effect_player::load_effect */
 void offscreen_effect_player::load_effect(const std::string& effect_path)
 {
@@ -141,7 +137,6 @@ void offscreen_effect_player::call_js_method(const std::string& method, const st
         m_ort->activate_context();
         oep_api::call_js_method(method, param);
     };
-
     m_scheduler.enqueue(task);
 }
 

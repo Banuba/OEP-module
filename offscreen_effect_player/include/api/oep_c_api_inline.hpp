@@ -18,6 +18,13 @@ inline oep_api::oep_api(const std::vector<std::string>& path_to_resources, const
     m_utility = bnb_utility_manager_init(res_paths.get(), client_token.c_str(), nullptr);
 }
 
+/* oep_api::~oep_api    DESTRUCTOR */
+inline oep_api::~oep_api()
+{
+    bnb_effect_player_destroy(m_ep, nullptr);
+    bnb_utility_manager_release(m_utility, nullptr);
+}
+
 /* oep_api::pause */
 inline void oep_api::pause()
 {
@@ -44,13 +51,6 @@ inline void oep_api::init(int32_t width, int32_t height, bool manual_audio)
     if (m_ep == nullptr) {
         throw std::runtime_error("Failed to create effect player holder.");
     }
-}
-
-/* oep_api::deinit */
-inline void oep_api::deinit()
-{
-    bnb_effect_player_destroy(m_ep, nullptr);
-    bnb_utility_manager_release(m_utility, nullptr);
 }
 
 /* oep_api::surface_created */
