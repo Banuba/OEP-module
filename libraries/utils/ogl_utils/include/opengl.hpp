@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #define BNB_GL
 
-#include <c_api/c_api_cpp_api_diff.hpp>
+#include <interfaces/api.hpp>
 #if C_API
     #include <utility>
     #include "singleton.hpp"

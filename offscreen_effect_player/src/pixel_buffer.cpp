@@ -44,10 +44,12 @@ namespace bnb
         if (auto oep_sp = m_oep_ptr.lock()) {
             auto convert_callback = [this, callback](data_t data) {
 #if C_API
-                /* bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
-                auto bpc8 = bpc8_image_t(color_plane_weak(data.data.get()), interfaces::pixel_format::rgba, frm);
-                callback(nv12_image(y_plane, m_width, uv_plane, m_width, frm)); */
-                // TODO for c-api
+                bnb_error* error = nullptr;
+                bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
+                bnb_pixel_format_t pxfmt{BNB_RGBA};
+                image_wrapper img(imfmt, pxfmt, data.data.get(), m_width * 4);
+
+                callback(img);
 #elif CPP_API
                 bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
                 auto bpc8 = bpc8_image_t(color_plane_weak(data.data.get()), interfaces::pixel_format::rgba, frm);
@@ -70,27 +72,8 @@ namespace bnb
 
         if (auto oep_sp = m_oep_ptr.lock()) {
             auto convert_callback = [this, callback](data_t data) {
-#if C_API
-                color_plane y_plane = color_plane_alloc(m_width * m_height);
-                color_plane uv_plane = color_plane_alloc((m_width / 2 * m_height / 2) * 2);
-
-                bnb_image_format_t frm{m_width, m_height, m_orientation, false, 0};
-
-                libyuv::ABGRToNV12(data.data.get(),
-                    m_width * 4,
-                    y_plane.get(),
-                    m_width,
-                    uv_plane.get(),
-                    m_width,
-                    m_width,
-                    m_height);
-
-                callback(nv12_image(y_plane, m_width, uv_plane, m_width, frm));
-#elif CPP_API
                 std::vector<uint8_t> y_plane(m_width * m_height);
                 std::vector<uint8_t> uv_plane((m_width / 2 * m_height / 2) * 2);
-
-                bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
 
                 libyuv::ABGRToNV12(data.data.get(),
                     m_width * 4,
@@ -100,6 +83,13 @@ namespace bnb
                     m_width,
                     m_width,
                     m_height);
+#if C_API
+                bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
+                image_wrapper img(imfmt, y_plane.data(), m_width, uv_plane.data(), m_width / 2);
+
+                callback(img);
+#elif CPP_API
+                bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
 
                 callback(full_image_t(yuv_image_t(color_plane_vector(y_plane), color_plane_vector(uv_plane), frm)));
 #endif /* CPP_API */

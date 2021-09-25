@@ -25,7 +25,7 @@ public:
                         ~offscreen_effect_player();
 
     void                process_image_async(
-                                std::shared_ptr<image_type_alias> image, 
+                                std::shared_ptr<bnb_full_image_alias> image, 
                                 oep_pb_ready_cb callback,
                                 std::optional<interfaces::orient_format> target_orient
                         ) override;

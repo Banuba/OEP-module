@@ -1,8 +1,8 @@
 #pragma once
 
-#if !defined(INCLUDE_OEP_CPP_API_MACRO)
+#if !defined(INCLUDE_OEP_CPP_API_INLINE_MACRO)
 #error "Do not include this file. Use 'oep_api.hpp' to include the API dependent file."
-#endif /* !defined(INCLUDE_OEP_CPP_API_MACRO) */
+#endif /* !defined(INCLUDE_OEP_CPP_API_INLINE_MACRO) */
 
 #include <iostream>
 
@@ -67,7 +67,7 @@ inline void oep_api::surface_destroyed()
 }
 
 /* oep_api::draw_image */
-inline void oep_api::draw_image(std::shared_ptr<image_type_alias> image)
+inline void oep_api::draw_image(std::shared_ptr<bnb_full_image_alias> image)
 {
     m_ep->push_frame(std::move(*image));
     while (m_ep->draw() < 0) {

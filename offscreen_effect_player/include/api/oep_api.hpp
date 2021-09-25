@@ -1,13 +1,6 @@
 #pragma once
 
-#include <preprocessor/build_macros.hpp>
-#if C_API
-    #include <bnb/effect_player.h>
-    #include <bnb/utility_manager.h>
-#elif CPP_API
-    #include <bnb/effect_player/interfaces/all.hpp>
-    #include <bnb/effect_player/utility.hpp>
-#endif /* CPP_API */
+#include <interfaces/api.hpp>
 
 namespace bnb::api
 {
@@ -29,25 +22,25 @@ protected:
     void        surface_changed(int32_t width, int32_t height);
     void        surface_destroyed();
 
-    void        draw_image(std::shared_ptr<image_type_alias> image);
+    void        draw_image(std::shared_ptr<bnb_full_image_alias> image);
 
     bool        load_effect(const std::string& effect);
 
     bool        call_js_method(const std::string& method, const std::string& param);
 
 private:
-    IF_C_API(utility_manager_holder_t*)     IF_CPP_API(bnb::utility)                                m_utility;
-    IF_C_API(effect_player_holder_t*)       IF_CPP_API(std::shared_ptr<interfaces::effect_player>)  m_ep;
-};
+    bnb_utility_manager_alias   m_utility;
+    bnb_effect_player_alias     m_ep;
+}; /* class oep_api */
 
 } /* bnb::api */
 
 #if C_API
-    #define INCLUDE_OEP_C_API_MACRO
+    #define INCLUDE_OEP_C_API_INLINE_MACRO
     #include "oep_c_api_inline.hpp"
-    #undef INCLUDE_OEP_C_API_MACRO
+    #undef INCLUDE_OEP_C_API_INLINE_MACRO
 #elif CPP_API
-    #define INCLUDE_OEP_CPP_API_MACRO
+    #define INCLUDE_OEP_CPP_API_INLINE_MACRO
     #include "oep_cpp_api_inline.hpp"
-    #undef INCLUDE_OEP_CPP_API_MACRO
+    #undef INCLUDE_OEP_CPP_API_INLINE_MACRO
 #endif /* CPP_API */

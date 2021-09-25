@@ -1,6 +1,6 @@
 #include "glfw_window.hpp"
 
-#include <c_api/c_api_cpp_api_diff.hpp>
+#include <interfaces/api.hpp>
 #if C_API
     #include <bnb/effect_player.h>
     #include "defs.hpp"

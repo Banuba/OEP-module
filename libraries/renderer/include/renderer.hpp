@@ -1,6 +1,6 @@
 #pragma once
 
-#include <c_api/c_api_cpp_api_diff.hpp>
+#include <interfaces/api.hpp>
 
 #include "program.hpp"
 #include "frame_surface_handler.hpp"

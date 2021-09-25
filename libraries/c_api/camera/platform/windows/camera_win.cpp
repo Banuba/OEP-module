@@ -61,8 +61,8 @@ bnb::camera_win::camera_win(const camera_base::push_frame_cb_t& cb)
             throw std::runtime_error("Unsupported format from camera");
         }
 
-        // see nv12_image.hpp
-        auto img = std::make_shared<nv12_image>(y_plane, surface_stride, uv_plane, surface_stride, format);
+        // see api.hpp
+        auto img = std::make_shared<image_wrapper>(format, y_plane, surface_stride, uv_plane, surface_stride);
 
         if (m_push_frame_cb) {
             m_push_frame_cb(std::move(img));

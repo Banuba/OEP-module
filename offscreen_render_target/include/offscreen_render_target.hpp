@@ -1,6 +1,6 @@
 #pragma once
 
-#include <interfaces/c_api/c_api_only.hpp>
+#include <interfaces/api.hpp>
 
 #include "interfaces/offscreen_render_target.hpp"
 

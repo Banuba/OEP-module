@@ -1,6 +1,6 @@
 #pragma once
 
-#include <interfaces/c_api/c_api_only.hpp>
+#include <interfaces/api.hpp>
 #include <interfaces/formats.hpp>
 #include <interfaces/offscreen_render_target.hpp>
 #include <interfaces/pixel_buffer.hpp>
@@ -31,7 +31,7 @@ namespace interfaces
          *
          * Example process_image_async(image_sptr, [](ipb_sptr sptr){})
          */
-        virtual void process_image_async(std::shared_ptr<image_type_alias> image, oep_pb_ready_cb callback,
+        virtual void process_image_async(std::shared_ptr<bnb_full_image_alias> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
 
         /**

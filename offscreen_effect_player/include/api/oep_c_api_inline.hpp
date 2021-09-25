@@ -1,8 +1,8 @@
 #pragma once
 
-#if !defined(INCLUDE_OEP_C_API_MACRO)
+#if !defined(INCLUDE_OEP_C_API_INLINE_MACRO)
 #error "Do not include this file. Use 'oep_api.hpp' to include the API dependent file."
-#endif /* !defined(INCLUDE_OEP_C_API_MACRO) */
+#endif /* !defined(INCLUDE_OEP_C_API_INLINE_MACRO) */
 
 #include <iostream>
 
@@ -84,21 +84,14 @@ inline void oep_api::surface_destroyed()
 
 
 /* oep_api::draw_image */
-inline void oep_api::draw_image(std::shared_ptr<image_type_alias> image)
+inline void oep_api::draw_image(std::shared_ptr<bnb_full_image_alias> image)
 {
-    bnb_error* error = nullptr;
-    full_image_holder_t* img = bnb_full_image_from_yuv_nv12_img(
-        image->get_format(),
-        image->get_y_data(), image->get_y_stride(),
-        image->get_uv_data(), image->get_uv_stride(),
-        &error);
-    CHECK_ERROR(error);
-    if (!img) {
+    bnb_error* error{nullptr};
+    if (!image) {
         throw std::runtime_error("no image was created");
     }
-    bnb_effect_player_push_frame(m_ep, img, &error);
+    bnb_effect_player_push_frame(m_ep, image.get()->get(), &error);
     CHECK_ERROR(error);
-    bnb_full_image_release(img, nullptr);
 
     while (bnb_effect_player_draw(m_ep, &error) < 0) {
         std::this_thread::yield();

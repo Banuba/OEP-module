@@ -1,9 +1,9 @@
 #pragma once
 
-#include <interfaces/c_api/c_api_only.hpp>
+#include <interfaces/api.hpp>
 #include <optional>
 
-using oep_image_ready_cb = std::function<void(std::optional<image_type_alias> image)>;
+using oep_image_ready_cb = std::function<void(std::optional<bnb_full_image_alias> image)>;
 using oep_texture_cb = std::function<void(std::optional<int> texture_id)>;
 
 namespace bnb::interfaces

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include <interfaces/c_api/nv12_image.hpp>
+#include <interfaces/api.hpp>
 
 namespace bnb
 {
@@ -18,7 +18,7 @@ namespace bnb
     class camera_base
     {
     public:
-        using push_frame_cb_t = std::function<void(std::shared_ptr<nv12_image>)>;
+        using push_frame_cb_t = std::function<void(std::shared_ptr<image_wrapper>)>;
 
         /*
          * Main thread

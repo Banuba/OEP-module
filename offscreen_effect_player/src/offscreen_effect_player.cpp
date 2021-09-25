@@ -69,7 +69,7 @@ offscreen_effect_player::~offscreen_effect_player()
 
 /* offscreen_effect_player::process_image_async */
 void offscreen_effect_player::process_image_async(
-        std::shared_ptr<image_type_alias> image, oep_pb_ready_cb callback,
+        std::shared_ptr<bnb_full_image_alias> image, oep_pb_ready_cb callback,
         std::optional<interfaces::orient_format> target_orient
 )
 {
