@@ -7,6 +7,7 @@ set(include_dirs
 file(GLOB_RECURSE srcs
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/api/*.hpp
 )
 
 add_library(offscreen_rt STATIC ${srcs})
@@ -30,9 +31,18 @@ if (APPLE)
     target_include_directories(offscreen_rt PUBLIC ${apple_includes})
 endif()
 
-target_link_libraries(offscreen_rt
-    glad
-    glfw
-    ogl_utils
-    yuv
-)
+if(DESKTOP_BUILD)
+    target_link_libraries(offscreen_rt
+        glad
+        glfw
+        ogl_utils
+        yuv
+    )
+elseif(ANDROID_BUILD)
+    target_link_libraries(offscreen_rt
+        GLESv3
+        EGL
+        ogl_utils
+        banuba
+    )
+endif()

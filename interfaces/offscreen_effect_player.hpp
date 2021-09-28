@@ -34,6 +34,9 @@ namespace interfaces
         virtual void process_image_async(std::shared_ptr<bnb_full_image_alias> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
 
+        virtual ipb_sptr process_image_rgba(std::shared_ptr<bnb_full_image_alias> image,
+                                            std::optional<orient_format> target_orient) = 0;
+
         /**
          * Notify about rendering surface being resized.
          * Must be called from the render thread.

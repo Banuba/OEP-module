@@ -46,7 +46,7 @@ inline void oep_api::enable_audio(bool enable)
 /* oep_api::init */
 inline void oep_api::init(int32_t width, int32_t height, bool manual_audio)
 {
-    bnb_effect_player_configuration_t ep_cfg{width, height, bnb_nn_mode_automatically, bnb_good, false, manual_audio};
+    bnb_effect_player_configuration_t ep_cfg{width, height, bnb_nn_mode_enable, bnb_good, false, manual_audio};
     m_ep = bnb_effect_player_create(&ep_cfg, nullptr);
     if (m_ep == nullptr) {
         throw std::runtime_error("Failed to create effect player holder.");

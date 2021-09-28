@@ -14,25 +14,30 @@
 #include <bnb/utility_manager.h>
 
 
-class image_wrapper : public std::shared_ptr<full_image_holder_t>
+class image_wrapper
 {
 public:
-                        image_wrapper();
-    explicit            image_wrapper(
-                                bnb_image_format_t format,
-                                bnb_pixel_format_t pixel_format,
-                                uint8_t* data,
-                                int32_t stride
-                        );
-    explicit            image_wrapper(
-                                bnb_image_format_t format,
-                                uint8_t* y_plane,
-                                int32_t y_stride,
-                                uint8_t* uv_plane,
-                                int32_t uv_stride
-                        );
+                            image_wrapper();
+    explicit                image_wrapper(
+                                    bnb_image_format_t format,
+                                    bnb_pixel_format_t pixel_format,
+                                    uint8_t* data,
+                                    int32_t stride
+                            );
+    explicit                image_wrapper(
+                                    bnb_image_format_t format,
+                                    uint8_t* y_plane,
+                                    int32_t y_stride,
+                                    uint8_t* uv_plane,
+                                    int32_t uv_stride
+                            );
 
-    bnb_image_format_t  get_format();
+    bnb_image_format_t      get_format();
+    uint8_t                 bytes_per_pixel();
+    full_image_holder_t*    get();
+private:
+    std::shared_ptr<full_image_holder_t>    m_image;
+    uint8_t                                 m_pxsize{0};
 };
 
 
@@ -49,11 +54,24 @@ inline image_wrapper::image_wrapper(
         uint8_t* data,
         int32_t stride
 ) 
-        : std::shared_ptr<full_image_holder_t>(
+        : m_image(
                 bnb_full_image_from_bpc8_img(format, pixel_format, data, stride, nullptr),
                                                [](full_image_holder_t* p){ bnb_full_image_release(p, nullptr); }
         )
 {
+    using fmt_t = bnb_image_format_t;
+    switch (pixel_format) {
+        case BNB_ARGB:
+        case BNB_RGBA:
+        case BNB_BGRA:
+            m_pxsize = 4;
+            return;
+        case BNB_RGB:
+        case BNB_BGR:
+            m_pxsize = 3;
+            return;
+    }
+    throw std::invalid_argument("Unexpected pixel format value");
 }
 
 /* image_wrapper::image_wrapper     CONSTRUCTOR create yuv_nv12 an image */
@@ -64,7 +82,7 @@ inline image_wrapper::image_wrapper(
         uint8_t* uv_plane,
         int32_t uv_stride
 )
-        : std::shared_ptr<full_image_holder_t>(
+        : m_image(
                 bnb_full_image_from_yuv_nv12_img(format, y_plane, y_stride, uv_plane, uv_stride, nullptr),
                                                [](full_image_holder_t* p){ bnb_full_image_release(p, nullptr); }
         )
@@ -77,6 +95,18 @@ inline bnb_image_format_t image_wrapper::get_format()
     bnb_image_format_t fmt;
     bnb_full_image_get_format(get(), &fmt, nullptr);
     return std::move(fmt);
+}
+
+/* image_wrapper::bytes_per_pixel */
+inline uint8_t image_wrapper::bytes_per_pixel()
+{
+    return m_pxsize;
+}
+
+/* image_wrapper::get */
+inline full_image_holder_t* image_wrapper::get()
+{
+    return m_image.get();
 }
 
 
@@ -114,7 +144,7 @@ namespace bnb {
 typedef bnb::camera_orientation             bnb_image_orientation_alias;
 typedef bnb::full_image_t                   bnb_full_image_alias;
 typedef bnb::utility                        bnb_utility_manager_alias;
-typedef std::shared_ptr<interfaces::effect_player>  bnb_effect_player_alias;
+typedef std::shared_ptr<bnb::interfaces::effect_player>  bnb_effect_player_alias;
 
 /* aliases for bnb::camera_orientation (bnb_image_orientation_alias) */
 #define BNB_DEG_0_ALIAS                     bnb::camera_orientation::deg_0

@@ -51,8 +51,11 @@ offscreen_effect_player::offscreen_effect_player(
     }
     catch (std::runtime_error& e) {
         std::cout << "[ERROR] Failed to initialize effect player: " << e.what() << std::endl;
-        throw std::runtime_error("Failed to initialize effect player.");
+        std::string s = "Failed to initialize effect player.\n";
+        s.append(e.what());
+        throw std::runtime_error(s);
     }
+
 }
 
 /* offscreen_effect_player::~offscreen_effect_player    DESTRUCTOR */
@@ -107,6 +110,31 @@ void offscreen_effect_player::process_image_async(
     m_scheduler.enqueue(task);
 }
 
+/* offscreen_effect_player::process_image_rgba */
+ipb_sptr offscreen_effect_player::process_image_rgba(
+        std::shared_ptr<bnb_full_image_alias> image,
+        std::optional<interfaces::orient_format> target_orient
+)
+{
+    if (m_current_frame == nullptr) {
+        m_current_frame = std::make_shared<pixel_buffer>(shared_from_this(),
+            image->get_format().width, image->get_format().height, image->get_format().orientation);
+    }
+
+    if (!target_orient.has_value()) {
+        target_orient = {image->get_format().orientation, true};
+    }
+
+    auto task = [this, image, target_orient]() {
+        m_ort->activate_context();
+        m_ort->prepare_rendering();
+        oep_api::draw_image(image);
+        m_ort->orient_image(*target_orient);
+        return m_current_frame;
+    };
+    return m_scheduler.enqueue(task).get();
+}
+
 /* offscreen_effect_player::surface_changed */
 void offscreen_effect_player::surface_changed(int32_t width, int32_t height)
 {
@@ -155,6 +183,18 @@ void offscreen_effect_player::read_current_buffer(std::function<void(bnb::data_t
         }
     };
     m_scheduler.enqueue(task);
+}
+
+/* offscreen_effect_player::read_current_buffer */
+bnb::data_t offscreen_effect_player::read_current_buffer()
+{
+    if (std::this_thread::get_id() == render_thread_id) {
+        return m_ort->read_current_buffer();
+    }
+    auto task = [this]() {
+        return this->m_ort->read_current_buffer();
+    };
+    return m_scheduler.enqueue(task).get();
 }
 
 /* offscreen_effect_player::get_current_buffer_texture */

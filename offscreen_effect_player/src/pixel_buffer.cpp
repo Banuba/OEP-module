@@ -44,7 +44,6 @@ namespace bnb
         if (auto oep_sp = m_oep_ptr.lock()) {
             auto convert_callback = [this, callback](data_t data) {
 #if C_API
-                bnb_error* error = nullptr;
                 bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
                 bnb_pixel_format_t pxfmt{BNB_RGBA};
                 image_wrapper img(imfmt, pxfmt, data.data.get(), m_width * 4);
@@ -60,6 +59,27 @@ namespace bnb
             oep_sp->read_current_buffer(convert_callback);
         } else {
             std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
+        }
+    }
+
+    std::optional<bnb_full_image_alias> pixel_buffer::get_rgba()
+    {
+        if (auto oep_sp = m_oep_ptr.lock()) {
+            data_t data = oep_sp->read_current_buffer();
+#if C_API
+                bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
+                bnb_pixel_format_t pxfmt{BNB_RGBA};
+                image_wrapper img(imfmt, pxfmt, data.data.get(), m_width * 4);
+                return img;
+#elif CPP_API
+                bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
+                auto bpc8 = bpc8_image_t(color_plane_weak(data.data.get()), interfaces::pixel_format::rgba, frm);
+                auto img = full_image_t(std::move(bpc8));
+                return img;
+#endif /* CPP_API */
+        } else {
+            std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
+            return std::nullopt;
         }
     }
 

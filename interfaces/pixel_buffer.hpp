@@ -48,6 +48,8 @@ namespace bnb::interfaces
          */
         virtual void get_rgba(oep_image_ready_cb callback) = 0;
 
+        virtual std::optional<bnb_full_image_alias> get_rgba() = 0;
+
         /**
          * In thread with active texture get pixel bytes from Offscreen_render_target and
          * convert to full_image_t.

@@ -18,9 +18,19 @@ target_include_directories(offscreen_ep PUBLIC
 
 target_include_directories(offscreen_ep SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 
-target_link_libraries(offscreen_ep
-    bnb_effect_player
-    offscreen_rt
-    utils
-    yuv
-)
+
+if(DESKTOP_BUILD)
+    target_link_libraries(offscreen_ep
+        bnb_effect_player
+        offscreen_rt
+        utils
+        yuv
+    )
+elseif(ANDROID_BUILD)
+    target_link_libraries(offscreen_ep
+        offscreen_rt
+        utils
+        yuv
+        banuba
+    )
+endif()

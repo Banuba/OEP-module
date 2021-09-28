@@ -19,6 +19,7 @@ namespace bnb
         bool is_locked() override;
 
         void get_rgba(oep_image_ready_cb callback) override;
+        std::optional<bnb_full_image_alias> get_rgba() override;
         void get_nv12(oep_image_ready_cb callback) override;
 
         virtual void get_texture(oep_texture_cb callback) override;

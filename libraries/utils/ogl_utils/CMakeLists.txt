@@ -16,7 +16,16 @@ target_include_directories(ogl_utils PUBLIC
     ${include_dirs}
 )
 
-target_link_libraries(ogl_utils
-    bnb_effect_player
-    glad
-)
+
+if(DESKTOP_BUILD)
+    target_link_libraries(ogl_utils
+        bnb_effect_player
+        glad
+    )
+elseif(ANDROID_BUILD)
+    target_link_libraries(ogl_utils
+        banuba
+    )
+endif()
+
+

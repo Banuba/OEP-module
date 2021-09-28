@@ -3,7 +3,12 @@
 #include "opengl.hpp"
 #include <sstream>
 
-#define BNB_GLSL_VERSION "#version 330 core \n"
+#include <preprocessor/build_macros.hpp>
+#if defined(ANDROID_BUILD_PART)
+    #define BNB_GLSL_VERSION "#version 300 es \n"
+#else
+    #define BNB_GLSL_VERSION "#version 330 core \n"
+#endif
 
 using namespace bnb;
 using namespace std;
@@ -38,7 +43,8 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success)
     {
         GL_CALL(glGetShaderInfoLog(vertexShader, 512, NULL, infoLog));
-        throw std::exception();
+        throw std::runtime_error(infoLog);
+        //throw std::exception();
     }
 
     // fragment shader
@@ -50,7 +56,8 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success)
     {
         GL_CALL(glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog));
-        throw std::exception();
+        throw std::runtime_error(infoLog);
+        //throw std::exception();
     }
 
     // link shaders
@@ -62,7 +69,8 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     GL_CALL(glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success));
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        throw std::exception();
+        throw std::runtime_error(infoLog);
+        //throw std::exception(infoLog);
     }
     GL_CALL(glDeleteShader(vertexShader));
     GL_CALL(glDeleteShader(fragmentShader));

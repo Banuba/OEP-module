@@ -77,7 +77,7 @@ namespace bnb::interfaces
          *
          * @return a data_t with bytes of the processed frame 
          *
-         * Example read_current_buffer()
+         * Example read_current_buffer_async()
          */
         virtual bnb::data_t read_current_buffer() = 0;
 

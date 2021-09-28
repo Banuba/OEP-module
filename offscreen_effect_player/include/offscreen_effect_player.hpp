@@ -30,6 +30,11 @@ public:
                                 std::optional<interfaces::orient_format> target_orient
                         ) override;
 
+    ipb_sptr            process_image_rgba(
+                                std::shared_ptr<bnb_full_image_alias> image,
+                                std::optional<interfaces::orient_format> target_orient
+                        ) override;
+
     void                surface_changed(int32_t width, int32_t height) override;
 
     void                load_effect(const std::string& effect_path) override;
@@ -46,6 +51,7 @@ private:
     friend class        pixel_buffer;
 
     void                read_current_buffer(std::function<void(bnb::data_t data)> callback);
+    bnb::data_t         read_current_buffer();
     void                get_current_buffer_texture(oep_texture_cb callback);
 
 private:
