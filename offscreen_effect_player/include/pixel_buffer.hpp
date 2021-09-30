@@ -5,6 +5,7 @@
 
 namespace bnb
 {
+
     class offscreen_effect_player;
     using oep_sptr = std::shared_ptr<offscreen_effect_player>;
     using oep_wptr = std::weak_ptr<offscreen_effect_player>;
@@ -31,5 +32,6 @@ namespace bnb
         uint32_t m_height = 0;
 
         bnb_image_orientation_alias m_orientation;
-    };
-} // bnb
+    }; /* class pixel_buffer            IMPLEMENTATION */
+
+} /* namespace bnb */

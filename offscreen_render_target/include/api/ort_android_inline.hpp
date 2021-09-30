@@ -4,7 +4,6 @@
 #error "Do not include this file. Use 'ort_api.hpp' to include the API dependent file."
 #endif /* !defined(INCLUDE_ORT_ANDROID_INLINE_MACRO) */
 
-
 namespace bnb::api
 {
 

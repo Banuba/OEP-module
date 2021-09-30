@@ -14,14 +14,14 @@ namespace bnb::api
 /* ort_api::load_functions */
 inline void ort_api::load_functions()
 {
-#if C_API
+#if C_API_ENABLED
     bnb_error* error = nullptr;
     bnb_effect_player_load_glad_functions((void*)glfwGetProcAddress, &error);
     if (error) {
         bnb_error_destroy(error);
         throw std::runtime_error("gladLoadGLLoader error");
     }
-#elif CPP_API
+#elif CPP_API_ENABLED
     #if BNB_OS_WINDOWS || BNB_OS_MACOS
         // it's only need for use while working with dynamic libs
         utility::load_glad_functions((GLADloadproc) glfwGetProcAddress);

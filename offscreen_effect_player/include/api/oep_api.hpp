@@ -35,12 +35,12 @@ private:
 
 } /* bnb::api */
 
-#if C_API
+#if C_API_ENABLED
     #define INCLUDE_OEP_C_API_INLINE_MACRO
     #include "oep_c_api_inline.hpp"
     #undef INCLUDE_OEP_C_API_INLINE_MACRO
-#elif CPP_API
+#elif CPP_API_ENABLED
     #define INCLUDE_OEP_CPP_API_INLINE_MACRO
     #include "oep_cpp_api_inline.hpp"
     #undef INCLUDE_OEP_CPP_API_INLINE_MACRO
-#endif /* CPP_API */
+#endif /* CPP_API_ENABLED */

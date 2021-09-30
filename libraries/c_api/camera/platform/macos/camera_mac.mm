@@ -155,7 +155,7 @@ using namespace bnb;
 
     OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
     std::shared_ptr<image_wrapper> img;
-    
+
     switch (pixelFormat) {
         case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: {
             CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
@@ -194,7 +194,7 @@ using namespace bnb;
             NSLog(@"ERROR TYPE : %d", pixelFormat);
             return;
     }
-    
+
     if (self.callback) {
         self.callback(std::move(img));
     }

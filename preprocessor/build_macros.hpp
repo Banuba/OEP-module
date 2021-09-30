@@ -40,11 +40,11 @@
 #if defined(C_API_BUILD_PART)
     #define IF_C_API(expr)          expr
     #define IF_CPP_API(expr)
-    #define C_API                   1
-    #define CPP_API                 0
+    #define C_API_ENABLED           1
+    #define CPP_API_ENABLED         0
 #else /* cpp-api build */
     #define IF_C_API(expr)
     #define IF_CPP_API(expr)        expr
-    #define C_API                   0
-    #define CPP_API                 1
+    #define C_API_ENABLED           0
+    #define CPP_API_ENABLED         1
 #endif

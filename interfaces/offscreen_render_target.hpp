@@ -1,7 +1,6 @@
 #pragma once
 
 #include <interfaces/api.hpp>
-#include <interfaces/formats.hpp>
 
 namespace bnb::interfaces
 {
@@ -26,7 +25,7 @@ namespace bnb::interfaces
          * Offscreen Render Target deinitialization. Should be called within the same thread as init();
          * Called by offscreen effect player.
          *
-         * Example init()
+         * Example deinit()
          */
         virtual void deinit() = 0;
 
@@ -68,7 +67,7 @@ namespace bnb::interfaces
          *
          * @param orient
          *
-         * Example prepare_rendering()
+         * Example orient_image()
          */
         virtual void orient_image(orient_format orient) = 0;
 
@@ -77,7 +76,7 @@ namespace bnb::interfaces
          *
          * @return a data_t with bytes of the processed frame 
          *
-         * Example read_current_buffer_async()
+         * Example read_current_buffer()
          */
         virtual bnb::data_t read_current_buffer() = 0;
 
@@ -98,7 +97,8 @@ namespace bnb::interfaces
          * Example get_sharing_context()
          */
         virtual oep_sharing_context get_sharing_context() = 0;
-    };
-} // bnb::interfaces
+    }; /* class offscreen_render_target         INTERFACE */
+
+} /* namespace bnb::interfaces */
 
 using iort_sptr = std::shared_ptr<bnb::interfaces::offscreen_render_target>;

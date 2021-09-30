@@ -16,7 +16,6 @@ target_include_directories(ogl_utils PUBLIC
     ${include_dirs}
 )
 
-
 if(DESKTOP_BUILD)
     target_link_libraries(ogl_utils
         bnb_effect_player
@@ -27,5 +26,3 @@ elseif(ANDROID_BUILD)
         banuba
     )
 endif()
-
-

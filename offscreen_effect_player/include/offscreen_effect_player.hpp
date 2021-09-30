@@ -2,12 +2,14 @@
 
 #include <interfaces/offscreen_effect_player.hpp>
 #include <interfaces/offscreen_render_target.hpp>
+#include <interfaces/api.hpp>
 #include "thread_pool.h"
 #include "pixel_buffer.hpp"
 #include "api/oep_api.hpp"
 
 namespace bnb
 {
+
 class offscreen_effect_player
         : public api::oep_api
         , public interfaces::offscreen_effect_player
@@ -56,11 +58,11 @@ private:
 
 private:
     iort_sptr           m_ort;                  /* offscreen render target INTERFACE */
-    thread_pool         m_scheduler;            /*  */
+    thread_pool         m_scheduler;
     std::thread::id     render_thread_id;
     ipb_sptr            m_current_frame;
     std::atomic<uint16_t> m_incoming_frame_queue_task_count = 0;
-};
+}; /* class offscreen_effect_player         IMPLEMENTATION */
 
 
 
@@ -88,5 +90,4 @@ inline void offscreen_effect_player::enable_audio(bool enable)
     oep_api::enable_audio(enable);
 }
 
-
-} // bnb
+} /* namespace bnb */

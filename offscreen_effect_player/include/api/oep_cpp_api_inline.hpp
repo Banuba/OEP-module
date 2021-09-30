@@ -102,4 +102,4 @@ inline bool oep_api::call_js_method(const std::string& method, const std::string
     return true;
 }
 
-} /* bnb::api */
+} /* namespace bnb::api */

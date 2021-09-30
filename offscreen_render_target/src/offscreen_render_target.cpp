@@ -412,4 +412,4 @@ interfaces::oep_sharing_context offscreen_render_target::get_sharing_context()
     return ort_api::get_context_raw_ptr();
 }
 
-} /* bnb */
+} /* namespace bnb */

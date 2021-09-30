@@ -73,16 +73,6 @@ inline void oep_api::surface_destroyed()
     bnb_effect_player_surface_destroyed(m_ep, nullptr);
 }
 
-#define CHECK_ERROR(error)                                  \
-    do {                                                    \
-        if (error) {                                        \
-            std::string msg = bnb_error_get_message(error); \
-            bnb_error_destroy(error);                       \
-            throw std::runtime_error(msg);                  \
-        }                                                   \
-    } while (false);
-
-
 /* oep_api::draw_image */
 inline void oep_api::draw_image(std::shared_ptr<bnb_full_image_alias> image)
 {
@@ -91,12 +81,22 @@ inline void oep_api::draw_image(std::shared_ptr<bnb_full_image_alias> image)
         throw std::runtime_error("no image was created");
     }
     bnb_effect_player_push_frame(m_ep, image.get()->get(), &error);
-    CHECK_ERROR(error);
+    if (error) {
+        goto go_throw;
+    }
 
     while (bnb_effect_player_draw(m_ep, &error) < 0) {
         std::this_thread::yield();
     }
-    CHECK_ERROR(error);
+    if (error) {
+        goto go_throw;
+    }
+
+    return;
+go_throw:
+    std::string msg = bnb_error_get_message(error);
+    bnb_error_destroy(error);
+    throw std::runtime_error(msg);
 }
 
 /* oep_api::load_effect */
@@ -128,4 +128,4 @@ inline bool oep_api::call_js_method(const std::string& method, const std::string
     return true;
 }
 
-} /* bnb::api */
+} /* namespace bnb::api */

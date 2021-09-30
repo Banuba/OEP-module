@@ -214,4 +214,4 @@ void offscreen_effect_player::get_current_buffer_texture(oep_texture_cb callback
     m_scheduler.enqueue(task);
 }
 
-} /* bnb */
+} /* namespace bnb */

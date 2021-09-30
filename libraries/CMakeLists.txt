@@ -5,4 +5,3 @@ if(NOT BUILD_ANDROID)
     endif()
     add_subdirectory(renderer)
 endif()
-

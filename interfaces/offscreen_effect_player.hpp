@@ -1,17 +1,17 @@
 #pragma once
 
 #include <interfaces/api.hpp>
-#include <interfaces/formats.hpp>
 #include <interfaces/offscreen_render_target.hpp>
 #include <interfaces/pixel_buffer.hpp>
 
-
-namespace bnb {
+namespace bnb
+{
 
     using oep_pb_ready_cb = std::function<void(std::optional<ipb_sptr>)>;
 
 namespace interfaces
 {
+
     class offscreen_effect_player
     {
     public:
@@ -34,6 +34,15 @@ namespace interfaces
         virtual void process_image_async(std::shared_ptr<bnb_full_image_alias> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
 
+        /**
+         * An synchronous method for passing a frame to effect player
+         *
+         * @param image full_image_t - containing a frame for processing 
+         * @param target_orient calling when frame will be processed, containing pointer of pixel_buffer for get bytes
+         * @return ipb_sptr - shared pointer to the pixel_buffer
+         *
+         * Example process_image_rgba(image_sptr, target_orient)
+         */
         virtual ipb_sptr process_image_rgba(std::shared_ptr<bnb_full_image_alias> image,
                                             std::optional<orient_format> target_orient) = 0;
 
@@ -96,9 +105,11 @@ namespace interfaces
          * Example call_js_method("just_bg", "{ "recordDuration": 15, "rotation_vector": true }")
          */
         virtual void call_js_method(const std::string& method, const std::string& param) = 0;
-    };
-}
-} // bnb::interfaces
+    }; /* class offscreen_effect_player         INTERFACE */
+
+} /* namespace interfaces */
+
+} /* namespace bnb */
 
 using ioep_sptr = std::shared_ptr<bnb::interfaces::offscreen_effect_player>;
 using ioep_wptr = std::weak_ptr<bnb::interfaces::offscreen_effect_player>;

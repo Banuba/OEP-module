@@ -54,7 +54,6 @@ private:
 
 } /* bnb::api */
 
-
 #if defined(DESKTOP_BUILD_PART)
     #define INCLUDE_ORT_DESKTOP_INLINE_MACRO
     #include "ort_desktop_inline.hpp"

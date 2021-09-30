@@ -8,6 +8,7 @@ using oep_texture_cb = std::function<void(std::optional<int> texture_id)>;
 
 namespace bnb::interfaces
 {
+    
     class pixel_buffer
     {
     public:
@@ -40,23 +41,31 @@ namespace bnb::interfaces
 
         /**
          * In thread with active texture get pixel bytes from Offscreen_render_target and
-         * convert to full_image_t.
+         * convert to bnb_full_image_alias.
          *
-         * @param callback calling with full_image_t. full_image_t keep RGBA
+         * @param callback calling with bnb_full_image_alias. bnb_full_image_alias keep RGBA
          *
-         * Example process_image_async([](std::optional<full_image_t> image){})
+         * Example get_rgba([](std::optional<bnb_full_image_alias> image){})
          */
         virtual void get_rgba(oep_image_ready_cb callback) = 0;
 
+        /**
+         * Synchronous method with active texture get pixel bytes from Offscreen_render_target
+         * and convert to bnb_full_image_alias.
+         *
+         * @return std::optional<bnb_full_image_alias> - the resulting image is stored here
+         * 
+         * Example image = get_rgba()
+         */
         virtual std::optional<bnb_full_image_alias> get_rgba() = 0;
 
         /**
          * In thread with active texture get pixel bytes from Offscreen_render_target and
-         * convert to full_image_t.
+         * convert to bnb_full_image_alias.
          *
-         * @param callback calling with full_image_t. full_image_t keep NV12
+         * @param callback calling with bnb_full_image_alias. bnb_full_image_alias keep NV12
          *
-         * Example process_image_async([](std::optional<full_image_t> image){})
+         * Example get_nv12([](std::optional<bnb_full_image_alias> image){})
          */
         virtual void get_nv12(oep_image_ready_cb callback) = 0;
 
@@ -69,7 +78,8 @@ namespace bnb::interfaces
          * Example get_texture([](std::optional<int> testure_id){})
          */
         virtual void get_texture(oep_texture_cb callback) = 0;
-    };
+    }; /* class pixel_buffer            INTERFACE */
+
 } /* bnb::interfaces */
 
 using ipb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;

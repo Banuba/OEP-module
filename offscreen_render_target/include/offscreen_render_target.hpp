@@ -61,6 +61,6 @@ private:
 
     std::once_flag      m_init_flag;
     std::once_flag      m_deinit_flag;
-};
+}; /* class offscreen_render_target         IMPLEMENTATION */
 
 } /* namespace bnb */

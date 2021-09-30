@@ -57,7 +57,6 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     {
         GL_CALL(glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog));
         throw std::runtime_error(infoLog);
-        //throw std::exception();
     }
 
     // link shaders
@@ -70,7 +69,6 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         throw std::runtime_error(infoLog);
-        //throw std::exception(infoLog);
     }
     GL_CALL(glDeleteShader(vertexShader));
     GL_CALL(glDeleteShader(fragmentShader));
