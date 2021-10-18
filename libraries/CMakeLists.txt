@@ -1,0 +1,7 @@
+add_subdirectory(utils)
+if(NOT BUILD_ANDROID)
+    if(BUILD_C_API)
+        add_subdirectory(c_api)
+    endif()
+    add_subdirectory(renderer)
+endif()
