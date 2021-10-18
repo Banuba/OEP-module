@@ -2,6 +2,12 @@
 
 #include "config.hpp"
 
+#ifdef DEBUG
+    #define ONLY_DEBUG(expr)        expr
+#else
+    #define ONLY_DEBUG(expr)        ((void)0)
+#endif
+
 /* desktop build */
 #if defined(DESKTOP_BUILD_PART)
     #define IF_DESKTOP(expr)        expr
@@ -23,15 +29,22 @@
     #define IF_ANDROID(expr)
 #endif
 
+/* win32 build */
+#if defined(WIN32)
+    #define ONLY_WIN32(expr)        expr
+#else
+    #define ONLY_WIN32(expr)        ((void)0)
+#endif /* defined(WIN32) */
+
 /* c-api build */
 #if defined(C_API_BUILD_PART)
     #define IF_C_API(expr)          expr
     #define IF_CPP_API(expr)
-    #define C_API                   1
-    #define CPP_API                 0
-#else
+    #define C_API_ENABLED           1
+    #define CPP_API_ENABLED         0
+#else /* cpp-api build */
     #define IF_C_API(expr)
     #define IF_CPP_API(expr)        expr
-    #define C_API                   0
-    #define CPP_API                 1
+    #define C_API_ENABLED           0
+    #define CPP_API_ENABLED         1
 #endif

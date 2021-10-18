@@ -1,10 +1,10 @@
 #include "glfw_window.hpp"
 
-#include <c_api/c_api_cpp_api_diff.hpp>
-#if C_API
+#include <interfaces/api.hpp>
+#if C_API_ENABLED
     #include <bnb/effect_player.h>
     #include "defs.hpp"
-#elif CPP_API
+#elif CPP_API_ENABLED
     #include <bnb/effect_player/utility.hpp>
     #include <bnb/utils/defs.hpp>
     using namespace bnb;
@@ -136,14 +136,14 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
 
 void glfw_window::load_glad_functions()
 {
-#if C_API
+#if C_API_ENABLED
     bnb_error* error = nullptr;
     bnb_effect_player_load_glad_functions((void*)glfwGetProcAddress, &error);
     if (error) {
         bnb_error_destroy(error);
         throw std::runtime_error("gladLoadGLLoader error");
     }
-#elif CPP_API
+#elif CPP_API_ENABLED
     #if BNB_OS_WINDOWS || BNB_OS_MACOS
         // it's only need for use while working with dynamic libs
         utility::load_glad_functions((GLADloadproc) glfwGetProcAddress);

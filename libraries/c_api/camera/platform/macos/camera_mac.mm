@@ -154,7 +154,7 @@ using namespace bnb;
     CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
     OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
-    std::shared_ptr<nv12_image> img;
+    std::shared_ptr<image_wrapper> img;
 
     switch (pixelFormat) {
         case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: {
@@ -174,24 +174,21 @@ using namespace bnb;
             // Retain twice. Each plane will release once.
             CVPixelBufferRetain(pixelBuffer);
             CVPixelBufferRetain(pixelBuffer);
-
-            img = std::make_shared<nv12_image>(
-                color_plane(
-                    lumo,
-                    [pixelBuffer](auto*) {
-                        // This code isn't 100% correct: if lumo plain is released first, chromo
-                        // may try to access 'unlocked" address.
+            
+            img = std::shared_ptr<image_wrapper>(
+                    new image_wrapper(
+                            format,
+                            lumo,
+                            int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)),
+                            chromo,
+                            int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1))
+                    ), [pixelBuffer](auto*) {
                         CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
                         CVPixelBufferRelease(pixelBuffer);
-                    }),
-                int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)),
-                color_plane(
-                    chromo,
-                    [pixelBuffer](auto*) {
                         CVPixelBufferRelease(pixelBuffer);
-                    }),
-                int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1)),
-                format);
+                    }
+            );
+
         } break;
         default:
             NSLog(@"ERROR TYPE : %d", pixelFormat);

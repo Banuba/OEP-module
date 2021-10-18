@@ -5,6 +5,7 @@
 
 namespace bnb
 {
+
     class offscreen_effect_player;
     using oep_sptr = std::shared_ptr<offscreen_effect_player>;
     using oep_wptr = std::weak_ptr<offscreen_effect_player>;
@@ -19,6 +20,7 @@ namespace bnb
         bool is_locked() override;
 
         void get_rgba(oep_image_ready_cb callback) override;
+        std::optional<bnb_full_image_alias> get_rgba() override;
         void get_nv12(oep_image_ready_cb callback) override;
 
         virtual void get_texture(oep_texture_cb callback) override;
@@ -30,5 +32,6 @@ namespace bnb
         uint32_t m_height = 0;
 
         bnb_image_orientation_alias m_orientation;
-    };
-} // bnb
+    }; /* class pixel_buffer            IMPLEMENTATION */
+
+} /* namespace bnb */
