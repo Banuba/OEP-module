@@ -34,6 +34,7 @@ namespace interfaces
         virtual void process_image_async(std::shared_ptr<bnb_full_image_alias> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
 
+        virtual void process_in_render_thread(std::function<void(void)>) = 0;
         /**
          * An synchronous method for passing a frame to effect player
          *

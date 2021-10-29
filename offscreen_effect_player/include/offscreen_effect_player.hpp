@@ -37,6 +37,8 @@ public:
                                 std::optional<interfaces::orient_format> target_orient
                         ) override;
 
+    void                process_in_render_thread(std::function<void(void)> callback) override;
+
     void                surface_changed(int32_t width, int32_t height) override;
 
     void                load_effect(const std::string& effect_path) override;

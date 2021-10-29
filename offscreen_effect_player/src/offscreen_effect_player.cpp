@@ -110,6 +110,12 @@ void offscreen_effect_player::process_image_async(
     m_scheduler.enqueue(task);
 }
 
+/* offscreen_effect_player::process_in_render_thread */
+void offscreen_effect_player::process_in_render_thread(std::function<void(void)> callback)
+{
+    m_scheduler.enqueue(callback).get();
+}
+
 /* offscreen_effect_player::process_image_rgba */
 ipb_sptr offscreen_effect_player::process_image_rgba(
         std::shared_ptr<bnb_full_image_alias> image,
