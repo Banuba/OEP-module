@@ -49,9 +49,11 @@ public:
     bnb_image_format_t      get_format();
     uint8_t                 bytes_per_pixel();
     full_image_holder_t*    get();
+    uint8_t*                get_rgb_data_ptr();
 private:
     std::shared_ptr<full_image_holder_t>    m_image;
     uint8_t                                 m_pxsize{0};
+    uint8_t*                                m_rgb_data_ptr{nullptr};
 }; /* class image_wrapper */
 
 
@@ -69,6 +71,7 @@ inline image_wrapper::image_wrapper(
         )
 {
     using fmt_t = bnb_image_format_t;
+    m_rgb_data_ptr = data;
     switch (pixel_format) {
         case BNB_ARGB:
         case BNB_RGBA:
@@ -116,6 +119,12 @@ inline uint8_t image_wrapper::bytes_per_pixel()
 inline full_image_holder_t* image_wrapper::get()
 {
     return m_image.get();
+}
+
+/* image_wrapper::get_rgb_data_ptr */
+inline uint8_t* image_wrapper::get_rgb_data_ptr()
+{
+    return m_rgb_data_ptr;
 }
 
 using bnb_image_orientation_alias =         bnb_image_orientation_t;

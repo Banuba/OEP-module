@@ -10,6 +10,8 @@
     #define BNB_GLSL_VERSION "#version 330 core \n"
 #endif
 
+#include <string>
+
 using namespace bnb;
 using namespace std;
 
@@ -43,7 +45,9 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success)
     {
         GL_CALL(glGetShaderInfoLog(vertexShader, 512, NULL, infoLog));
-        throw std::runtime_error(infoLog);
+        std::string s("vertex shader:\n");
+        s.append(infoLog);
+        throw std::runtime_error(s.c_str());
         //throw std::exception();
     }
 
@@ -56,7 +60,10 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success)
     {
         GL_CALL(glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog));
-        throw std::runtime_error(infoLog);
+        std::string s("fragment shader:\n");
+        s.append(infoLog);
+        throw std::runtime_error(s.c_str());
+        //throw std::exception();
     }
 
     // link shaders
@@ -69,6 +76,7 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         throw std::runtime_error(infoLog);
+        //throw std::exception(infoLog);
     }
     GL_CALL(glDeleteShader(vertexShader));
     GL_CALL(glDeleteShader(fragmentShader));
@@ -79,6 +87,11 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
 program::~program()
 {
     GL_CALL(glDeleteProgram(m_handle));
+}
+
+uniform program::get_uniform(const char* uniform_name)
+{
+    return uniform(m_handle, uniform_name);
 }
 
 void program::use() const

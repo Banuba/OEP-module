@@ -1,15 +1,17 @@
 #pragma once
+#include <utility>
 
 #include <preprocessor/build_macros.hpp>
 #if defined(ANDROID_BUILD_PART)
     #include <GLES3/gl3.h>
     #include "singleton.hpp"
 #else
+
     #include <interfaces/api.hpp>
-    #if C_API_ENABLED
+    #if C_API
         #include <utility>
         #include "singleton.hpp"
-    #elif CPP_API_ENABLED
+    #elif CPP_API
         #include <bnb/utils/singleton.hpp>
     #endif
     #include <glad/glad.h>
