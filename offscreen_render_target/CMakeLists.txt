@@ -1,13 +1,13 @@
 set(include_dirs
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/
     ${OEP_SUBMODULE_DIR}/
     ${PROJECT_SOURCE_DIR}/
 )
 
 file(GLOB_RECURSE srcs
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/api/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/api/*.hpp
 )
 
 add_library(offscreen_rt STATIC ${srcs})
@@ -20,11 +20,11 @@ target_include_directories(offscreen_rt SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 
 if (APPLE)
     set(apple_includes
-        ${CMAKE_CURRENT_SOURCE_DIR}/platform/macos/include/
+        ${CMAKE_CURRENT_SOURCE_DIR}/macos/include/
     )
 
     file(GLOB_RECURSE apple_srcs
-        ${CMAKE_CURRENT_SOURCE_DIR}/platform/macos/src/*.mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/macos/src/*.mm
     )
 
     target_sources(offscreen_rt PUBLIC ${apple_srcs})

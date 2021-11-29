@@ -22,10 +22,10 @@ namespace bnb::render
         }
     }
 
-    void render_thread::update_data(int texture_id)
+    void render_thread::update_data(int texture_id, bool draw_gray)
     {
         if (m_renderer)
-            m_renderer->update_data(texture_id);
+            m_renderer->update_data(texture_id, draw_gray);
     }
 
     void render_thread::thread_func(int32_t width, int32_t height)

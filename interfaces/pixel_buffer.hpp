@@ -4,7 +4,7 @@
 #include <optional>
 
 using oep_image_ready_cb = std::function<void(std::optional<bnb_full_image_alias> image)>;
-using oep_texture_cb = std::function<void(std::optional<unsigned int> texture_id)>;
+using oep_texture_cb = std::function<void(std::optional<uint32_t> texture_id)>;
 
 namespace bnb::interfaces
 {

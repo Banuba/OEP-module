@@ -14,16 +14,18 @@ namespace bnb::render
 
         void surface_change(int32_t width, int32_t height);
 
-        void update_data(int texture_id);
+        void update_data(int texture_id, bool draw_gray = false);
         bool draw();
 
     private:
         program m_program;
+        program m_program_gray;
         frame_surface_handler m_frame_surface;
 
         int m_width;
         int m_height;
         int m_texture_id{ 0 };
+        bool m_draw_gray {false};
 
         std::atomic<bool> m_rendering = false;
         std::atomic<bool> m_texture_updated = false;

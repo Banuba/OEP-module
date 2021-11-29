@@ -22,7 +22,19 @@ namespace
         "uniform sampler2D uTexture;\n"
         "void main()\n"
         "{\n"
-        "FragColor = texture(uTexture, TexCoord);\n"
+        "vec4 texel = texture(uTexture, TexCoord);\n"
+        "FragColor = texel;\n"
+        "}\n";
+
+    const char* fs_gray =
+        "precision highp float;\n"
+        "in vec2 TexCoord;\n"
+        "out vec4 FragColor;\n"
+        "uniform sampler2D uTexture;\n"
+        "void main()\n"
+        "{\n"
+        "vec4 texel = texture(uTexture, TexCoord);\n"
+        "FragColor = vec4(texel.x, texel.x, texel.x, 1.0);\n"
         "}\n";
 }
 
@@ -30,6 +42,7 @@ namespace bnb::render
 {
     renderer::renderer(int width, int height)
         : m_program("RendererCamera", vs, fs)
+        , m_program_gray("RendererCameraGray", vs, fs_gray)
         , m_frame_surface(BNB_DEG_0_ALIAS, false)
     {
         surface_change(width, height);
@@ -42,7 +55,7 @@ namespace bnb::render
         m_surface_changed = true;
     }
 
-    void renderer::update_data(int texture_id)
+    void renderer::update_data(int texture_id, bool draw_gray)
     {
         if (m_texture_updated && m_rendering) {
             return;
@@ -50,6 +63,7 @@ namespace bnb::render
 
         m_texture_updated = false;
         m_texture_id = texture_id;
+        m_draw_gray = draw_gray;
         m_texture_updated = true;
     }
 
@@ -68,7 +82,11 @@ namespace bnb::render
 
         m_texture_updated = false;
 
-        m_program.use();
+        if (m_draw_gray) {
+            m_program_gray.use();
+        } else {
+            m_program.use();
+        }
 
         GL_CALL(glActiveTexture(GLenum(GL_TEXTURE0)));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture_id));

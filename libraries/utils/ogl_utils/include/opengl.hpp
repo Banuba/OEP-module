@@ -8,10 +8,10 @@
 #else
 
     #include <interfaces/api.hpp>
-    #if C_API
+    #if C_API_ENABLED
         #include <utility>
         #include "singleton.hpp"
-    #elif CPP_API
+    #elif CPP_API_ENABLED
         #include <bnb/utils/singleton.hpp>
     #endif
     #include <glad/glad.h>

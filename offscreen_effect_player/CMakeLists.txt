@@ -1,13 +1,13 @@
 set(include_dirs
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/
     ${OEP_SUBMODULE_DIR}/
     ${PROJECT_SOURCE_DIR}/
 )
 
 file(GLOB_RECURSE srcs
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/api/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/api/*.hpp
 )
 
 add_library(offscreen_ep STATIC ${srcs})

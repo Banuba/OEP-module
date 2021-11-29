@@ -30,30 +30,28 @@ struct data_t
 class image_wrapper
 {
 public:
-                            image_wrapper() = default;
-    explicit                image_wrapper(
-                                    bnb_image_format_t format,
-                                    bnb_pixel_format_t pixel_format,
-                                    uint8_t* data,
-                                    int32_t stride
-                            );
-    explicit                image_wrapper(
-                                    bnb_image_format_t format,
-                                    uint8_t* y_plane,
-                                    int32_t y_stride,
-                                    uint8_t* uv_plane,
-                                    int32_t uv_stride
-                            );
-                            ~image_wrapper() = default;
+    image_wrapper() = default;
+    explicit image_wrapper(
+            bnb_image_format_t format,
+            bnb_pixel_format_t pixel_format,
+            uint8_t* data,
+            int32_t stride);
+    explicit image_wrapper(
+            bnb_image_format_t format,
+            uint8_t* y_plane,
+            int32_t y_stride,
+            uint8_t* uv_plane,
+            int32_t uv_stride);
+    ~image_wrapper() = default;
 
-    bnb_image_format_t      get_format();
-    uint8_t                 bytes_per_pixel();
-    full_image_holder_t*    get();
-    uint8_t*                get_rgb_data_ptr();
+    bnb_image_format_t get_format();
+    uint8_t bytes_per_pixel();
+    full_image_holder_t* get();
+    uint8_t* get_rgb_data_ptr();
 private:
-    std::shared_ptr<full_image_holder_t>    m_image;
-    uint8_t                                 m_pxsize{0};
-    uint8_t*                                m_rgb_data_ptr{nullptr};
+    std::shared_ptr<full_image_holder_t> m_image;
+    uint8_t m_pxsize {0};
+    uint8_t* m_rgb_data_ptr {nullptr};
 }; /* class image_wrapper */
 
 
@@ -127,16 +125,16 @@ inline uint8_t* image_wrapper::get_rgb_data_ptr()
     return m_rgb_data_ptr;
 }
 
-using bnb_image_orientation_alias =         bnb_image_orientation_t;
-using bnb_full_image_alias =                image_wrapper;
-using bnb_utility_manager_alias =           utility_manager_holder_t*;
-using bnb_effect_player_alias =             effect_player_holder_t*;
+using bnb_image_orientation_alias = bnb_image_orientation_t;
+using bnb_full_image_alias = image_wrapper;
+using bnb_utility_manager_alias = utility_manager_holder_t*;
+using bnb_effect_player_alias = effect_player_holder_t*;
 
 /* aliases for bnb_image_orientation_t (bnb_image_orientation_alias) */
-#define BNB_DEG_0_ALIAS                     BNB_DEG_0
-#define BNB_DEG_90_ALIAS                    BNB_DEG_90
-#define BNB_DEG_180_ALIAS                   BNB_DEG_180
-#define BNB_DEG_270_ALIAS                   BNB_DEG_270
+#define BNB_DEG_0_ALIAS BNB_DEG_0
+#define BNB_DEG_90_ALIAS BNB_DEG_90
+#define BNB_DEG_180_ALIAS BNB_DEG_180
+#define BNB_DEG_270_ALIAS BNB_DEG_270
 
 #elif CPP_API_ENABLED /* cpp-api dependent code */
 
@@ -145,16 +143,16 @@ using bnb_effect_player_alias =             effect_player_holder_t*;
 #include <bnb/effect_player/interfaces/all.hpp>
 #include <bnb/effect_player/utility.hpp>
 
-using bnb_image_orientation_alias =         bnb::camera_orientation;
-using bnb_full_image_alias =                bnb::full_image_t;
-using bnb_utility_manager_alias =           bnb::utility;
-using bnb_effect_player_alias =             std::shared_ptr<bnb::interfaces::effect_player>;
+using bnb_image_orientation_alias = bnb::camera_orientation;
+using bnb_full_image_alias = bnb::full_image_t;
+using bnb_utility_manager_alias = bnb::utility;
+using bnb_effect_player_alias = std::shared_ptr<bnb::interfaces::effect_player>;
 
 /* aliases for bnb::camera_orientation (bnb_image_orientation_alias) */
-#define BNB_DEG_0_ALIAS                     bnb::camera_orientation::deg_0
-#define BNB_DEG_90_ALIAS                    bnb::camera_orientation::deg_90
-#define BNB_DEG_180_ALIAS                   bnb::camera_orientation::deg_180
-#define BNB_DEG_270_ALIAS                   bnb::camera_orientation::deg_270
+#define BNB_DEG_0_ALIAS bnb::camera_orientation::deg_0
+#define BNB_DEG_90_ALIAS bnb::camera_orientation::deg_90
+#define BNB_DEG_180_ALIAS bnb::camera_orientation::deg_180
+#define BNB_DEG_270_ALIAS bnb::camera_orientation::deg_270
 
 #endif /* CPP_API_ENABLED */
 
