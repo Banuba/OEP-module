@@ -18,7 +18,10 @@ namespace bnb
         void set_uniform(const char* name, float v1, float v2, float v3, float v4) const;
 
         unsigned int get_uniform_location(const char* name) const;
-        unsigned int handle() const { return m_handle; }
+        unsigned int handle() const
+        {
+            return m_handle;
+        }
 
     private:
         unsigned int m_handle;

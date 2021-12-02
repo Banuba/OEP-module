@@ -78,18 +78,18 @@ bnb::camera_win::~camera_win()
 void bnb::camera_win::set_device_by_index(uint32_t index)
 {
     std::cout << "[Camera Win]: "
-        << "Only default camera device supported";
+              << "Only default camera device supported";
 }
 void bnb::camera_win::set_device_by_id(const std::string& device_id)
 {
-    std::cout << "[Camera Win]: " <<
-        "Only default camera device supported";
+    std::cout << "[Camera Win]: "
+              << "Only default camera device supported";
 }
 
 void bnb::camera_win::start()
 {
     std::cout << "[Camera Win]: "
-        << "Camera starts in constructor";
+              << "Camera starts in constructor";
 }
 
 bnb::camera_sptr bnb::create_camera_device(camera_base::push_frame_cb_t cb, size_t index)

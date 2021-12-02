@@ -1,9 +1,11 @@
 /* for more details see
-https://chromium.googlesource.com/external/webrtc/+/HEAD/sdk/android/api/org/webrtc/YuvConverter.java
-converter works correctly if the width is a multiple of eight and the height is a multiple of two.
-In case of a remainder of dividing the width by eight, there will be distortion in the width.
-The larger the remainder of the division, the greater the distortion of the width.
-*/
+ * https://chromium.googlesource.com/external/webrtc/+/HEAD/sdk/android/api/org/webrtc/YuvConverter.java
+ *
+ * NOTE:
+ * converter works correctly if the width is a multiple of eight and the height is a multiple of two.
+ * In case of a remainder of dividing the width by eight, there will be distortion in the width.
+ * The larger the remainder of the division, the greater the distortion of the width.
+ */
 
 #pragma once
 #include <memory>
@@ -39,13 +41,13 @@ namespace bnb::converter
         struct yuv_data
         {
             std::unique_ptr<uint8_t[], std::function<void(uint8_t*)>> data;
-            size_t size {0};
-            uint8_t *y_plane_data {nullptr};
-            uint8_t *u_plane_data {nullptr};
-            uint8_t *v_plane_data {nullptr};
-            int y_plane_stride {0};
-            int u_plane_stride {0};
-            int v_plane_stride {0};
+            size_t size{0};
+            uint8_t* y_plane_data{nullptr};
+            uint8_t* u_plane_data{nullptr};
+            uint8_t* v_plane_data{nullptr};
+            int y_plane_stride{0};
+            int u_plane_stride{0};
+            int v_plane_stride{0};
         };
 
     public:
@@ -61,10 +63,10 @@ namespace bnb::converter
     private:
         struct framebuffer
         {
-            uint32_t fbo {0};
-            uint32_t texture {0};
-            int width {0};
-            int height {0};
+            uint32_t fbo{0};
+            uint32_t texture{0};
+            int width{0};
+            int height{0};
         };
 
     private:
@@ -73,31 +75,32 @@ namespace bnb::converter
         void delete_framebuffer(framebuffer& fbo);
 
     private:
-        uint32_t m_vbo {0};
-        uint32_t m_vao {0};
-        int32_t m_draw_indent {0};
-        int m_width {0};
-        int m_height {0};
-        const float *m_y_plane_coefs {nullptr};
-        const float *m_u_plane_coefs {nullptr};
-        const float *m_v_plane_coefs {nullptr};
-        float m_pixel_step_y[2] {0.0f, 0.0f};
-        float m_pixel_step_uv[2] {0.0f, 0.0f};
-        rotation m_rotation {rotation::deg_0};
-        bool m_vertical_flip {false};
+        uint32_t m_vbo{0};
+        uint32_t m_vao{0};
+        int32_t m_draw_indent{0};
+        int m_width{0};
+        int m_height{0};
+        const float* m_y_plane_coefs{nullptr};
+        const float* m_u_plane_coefs{nullptr};
+        const float* m_v_plane_coefs{nullptr};
+        float m_pixel_step_y[2]{0.0f, 0.0f};
+        float m_pixel_step_uv[2]{0.0f, 0.0f};
+        rotation m_rotation{rotation::deg_0};
+        bool m_vertical_flip{false};
         framebuffer m_fbo;
         program m_shader;
     };
 
 
-
     /* yuv_converter::get_width */
-    inline int yuv_converter::get_width() {
+    inline int yuv_converter::get_width()
+    {
         return m_width;
     }
 
     /* yuv_converter::get_height */
-    inline int yuv_converter::get_height() {
+    inline int yuv_converter::get_height()
+    {
         return m_height;
     }
 

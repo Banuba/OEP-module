@@ -23,12 +23,12 @@ namespace bnb::render
     private:
         void thread_func(int32_t width, int32_t height);
 
-        std::unique_ptr<renderer> m_renderer { nullptr };
+        std::unique_ptr<renderer> m_renderer{nullptr};
         GLFWwindow* m_window;
         std::thread m_thread;
         std::atomic<bool> m_cancellation_flag;
     };
-} // bnb::render
+} // namespace bnb::render
 
 using render_t_sptr = std::shared_ptr<bnb::render::render_thread>;
 using render_t_wptr = std::weak_ptr<bnb::render::render_thread>;

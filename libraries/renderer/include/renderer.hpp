@@ -24,12 +24,12 @@ namespace bnb::render
 
         int m_width;
         int m_height;
-        int m_texture_id{ 0 };
-        bool m_draw_gray {false};
+        int m_texture_id{0};
+        bool m_draw_gray{false};
 
         std::atomic<bool> m_rendering = false;
         std::atomic<bool> m_texture_updated = false;
 
         std::atomic<bool> m_surface_changed = false;
     };
-} // bnb::render
+} // namespace bnb::render

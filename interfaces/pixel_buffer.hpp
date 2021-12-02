@@ -8,7 +8,7 @@ using oep_texture_cb = std::function<void(std::optional<uint32_t> texture_id)>;
 
 namespace bnb::interfaces
 {
-    
+
     class pixel_buffer
     {
     public:
@@ -54,7 +54,7 @@ namespace bnb::interfaces
          * and convert to bnb_full_image_alias.
          *
          * @return std::optional<bnb_full_image_alias> - the resulting image is stored here
-         * 
+         *
          * Example image = get_rgba()
          */
         virtual std::optional<bnb_full_image_alias> get_rgba() = 0;
@@ -80,6 +80,6 @@ namespace bnb::interfaces
         virtual void get_texture(oep_texture_cb callback) = 0;
     }; /* class pixel_buffer            INTERFACE */
 
-} /* bnb::interfaces */
+} // namespace bnb::interfaces
 
 using ipb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;

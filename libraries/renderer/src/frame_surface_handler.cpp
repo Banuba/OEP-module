@@ -1,5 +1,6 @@
 #include "frame_surface_handler.hpp"
 
+// clang-format off
 const float bnb::render::frame_surface_handler::vertices[2][frame_surface_handler::v_size][5 * 4] =
 {{ /* verical flip 0 */
 {
@@ -61,3 +62,4 @@ const float bnb::render::frame_surface_handler::vertices[2][frame_surface_handle
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // top left
 }
 }};
+// clang-format on

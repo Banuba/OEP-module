@@ -74,7 +74,7 @@ namespace bnb::interfaces
         /**
          * Reading current buffer of active texture
          *
-         * @return a data_t with bytes of the processed frame 
+         * @return a data_t with bytes of the processed frame
          *
          * Example read_current_buffer()
          */

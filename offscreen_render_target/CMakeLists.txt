@@ -20,11 +20,11 @@ target_include_directories(offscreen_rt SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 
 if (APPLE)
     set(apple_includes
-        ${CMAKE_CURRENT_SOURCE_DIR}/macos/include/
+        ${CMAKE_CURRENT_SOURCE_DIR}/macos/
     )
 
     file(GLOB_RECURSE apple_srcs
-        ${CMAKE_CURRENT_SOURCE_DIR}/macos/src/*.mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/macos/*.mm
     )
 
     target_sources(offscreen_rt PUBLIC ${apple_srcs})

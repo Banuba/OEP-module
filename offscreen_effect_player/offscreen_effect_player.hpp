@@ -5,33 +5,36 @@
 #include <interfaces/api.hpp>
 #include "thread_pool.h"
 #include "pixel_buffer.hpp"
-#include "api/oep_api.hpp"
+#include "oep_api.hpp"
 
 namespace bnb
 {
 
     class offscreen_effect_player
-            : public api::oep_api
-            , public interfaces::offscreen_effect_player
-            , public std::enable_shared_from_this<offscreen_effect_player>
+        : public api::oep_api,
+          public interfaces::offscreen_effect_player,
+          public std::enable_shared_from_this<offscreen_effect_player>
     {
     private:
         offscreen_effect_player(
-                const std::vector<std::string>& path_to_resources,
-                const std::string& client_token,
-                int32_t width, int32_t height, bool manual_audio, iort_sptr ort);
+            const std::vector<std::string>& path_to_resources,
+            const std::string& client_token,
+            int32_t width,
+            int32_t height,
+            bool manual_audio,
+            iort_sptr ort);
 
     public:
         ~offscreen_effect_player();
 
         void process_image_async(
-                std::shared_ptr<bnb_full_image_alias> image, 
-                oep_pb_ready_cb callback,
-                std::optional<interfaces::orient_format> target_orient ) override;
+            std::shared_ptr<bnb_full_image_alias> image,
+            oep_pb_ready_cb callback,
+            std::optional<interfaces::orient_format> target_orient) override;
 
         ipb_sptr process_image_rgba(
-                std::shared_ptr<bnb_full_image_alias> image,
-                std::optional<interfaces::orient_format> target_orient) override;
+            std::shared_ptr<bnb_full_image_alias> image,
+            std::optional<interfaces::orient_format> target_orient) override;
 
         void surface_changed(int32_t width, int32_t height) override;
 
@@ -59,7 +62,6 @@ namespace bnb
         ipb_sptr m_current_frame;
         std::atomic<uint16_t> m_incoming_frame_queue_task_count = 0;
     }; /* class offscreen_effect_player         IMPLEMENTATION */
-
 
 
     /* offscreen_effect_player::unload_effect */

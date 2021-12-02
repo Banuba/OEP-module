@@ -42,11 +42,11 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     int success;
     char infoLog[512];
     GL_CALL(glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success));
-    if (!success)
-    {
+    if (!success) {
         GL_CALL(glGetShaderInfoLog(vertexShader, 512, NULL, infoLog));
         std::ostringstream ss;
-        ss << "vertex shader:\n" << infoLog << "\n";
+        ss << "vertex shader:\n"
+           << infoLog << "\n";
         throw std::runtime_error(ss.str().c_str());
     }
 
@@ -56,11 +56,11 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     GL_CALL(glCompileShader(fragmentShader));
     // check for shader compile errors
     GL_CALL(glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success));
-    if (!success)
-    {
+    if (!success) {
         GL_CALL(glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog));
         std::ostringstream ss;
-        ss << "fragment shader:\n" << infoLog << "\n";
+        ss << "fragment shader:\n"
+           << infoLog << "\n";
         throw std::runtime_error(ss.str().c_str());
     }
 
@@ -74,7 +74,8 @@ program::program(const char* name, const char* vertex_shader_code, const char* f
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::ostringstream ss;
-        ss << "shader program:\n" << infoLog << "\n";
+        ss << "shader program:\n"
+           << infoLog << "\n";
         throw std::runtime_error(ss.str().c_str());
     }
     GL_CALL(glDeleteShader(vertexShader));

@@ -7,7 +7,6 @@ set(include_dirs
 file(GLOB_RECURSE srcs
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/api/*.hpp
 )
 
 add_library(offscreen_ep STATIC ${srcs})
