@@ -39,7 +39,7 @@ using namespace bnb;
 - (id)init
 {
     self = [super init];
-    //Get all media devices
+    // Get all media devices
     NSMutableArray* devices = (NSMutableArray*) [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
 
     self.videoDevices = (NSArray*) devices;
@@ -88,11 +88,11 @@ using namespace bnb;
         if (newCamera == nil) {
             NSLog(@"Not compatible name: %zu", device_id);
             newCamera = [self.videoDevices objectAtIndex:device_id];
-            //return;
+            // return;
         }
-        //Change camera source
+        // Change camera source
         if (self.session) {
-            //Indicate that some changes will be made to the session
+            // Indicate that some changes will be made to the session
             [self.session beginConfiguration];
 
             // //Remove existing input
@@ -102,7 +102,7 @@ using namespace bnb;
                 [self.session removeInput:currentCameraInput];
             }
 
-            //Add input to session
+            // Add input to session
             NSError* err = nil;
             AVCaptureDeviceInput* newVideoInput = [[AVCaptureDeviceInput alloc] initWithDevice:newCamera error:&err];
             if (!newVideoInput || err) {
@@ -111,7 +111,7 @@ using namespace bnb;
                 [self.session addInput:newVideoInput];
             }
 
-            //Commit all the configuration changes at once
+            // Commit all the configuration changes at once
             [self.session commitConfiguration];
         }
     }
@@ -174,20 +174,19 @@ using namespace bnb;
             // Retain twice. Each plane will release once.
             CVPixelBufferRetain(pixelBuffer);
             CVPixelBufferRetain(pixelBuffer);
-            
+
             img = std::shared_ptr<image_wrapper>(
-                    new image_wrapper(
-                            format,
-                            lumo,
-                            int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)),
-                            chromo,
-                            int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1))
-                    ), [pixelBuffer](auto*) {
-                        CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-                        CVPixelBufferRelease(pixelBuffer);
-                        CVPixelBufferRelease(pixelBuffer);
-                    }
-            );
+                new image_wrapper(
+                    format,
+                    lumo,
+                    int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)),
+                    chromo,
+                    int32_t(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1))),
+                [pixelBuffer](auto*) {
+                    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+                    CVPixelBufferRelease(pixelBuffer);
+                    CVPixelBufferRelease(pixelBuffer);
+                });
 
         } break;
         default:

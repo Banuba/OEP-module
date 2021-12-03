@@ -38,19 +38,19 @@ const char* gl::context_info::error_code_to_string(GLenum error_code) const
 {
     switch (error_code) {
         // clang-format off
-        case GL_INVALID_ENUM:                  return "INVALID_ENUM";
-        case GL_INVALID_VALUE:                 return "INVALID_VALUE";
-        case GL_INVALID_OPERATION:             return "INVALID_OPERATION";
+            case GL_INVALID_ENUM:                  return "INVALID_ENUM";
+            case GL_INVALID_VALUE:                 return "INVALID_VALUE";
+            case GL_INVALID_OPERATION:             return "INVALID_OPERATION";
 
-#ifdef BNB_GL
-        case GL_STACK_OVERFLOW:                return "STACK_OVERFLOW";
-        case GL_STACK_UNDERFLOW:               return "STACK_UNDERFLOW";
-#endif
+    #ifdef BNB_GL
+            case GL_STACK_OVERFLOW:                return "STACK_OVERFLOW";
+            case GL_STACK_UNDERFLOW:               return "STACK_UNDERFLOW";
+    #endif
 
-        case GL_OUT_OF_MEMORY:                 return "OUT_OF_MEMORY";
-        case GL_INVALID_FRAMEBUFFER_OPERATION: return "INVALID_FRAMEBUFFER_OPERATION";
-        default:
-            return "UNKNOWN";
+            case GL_OUT_OF_MEMORY:                 return "OUT_OF_MEMORY";
+            case GL_INVALID_FRAMEBUFFER_OPERATION: return "INVALID_FRAMEBUFFER_OPERATION";
+            default:
+                return "UNKNOWN";
             // clang-format on
     }
 }

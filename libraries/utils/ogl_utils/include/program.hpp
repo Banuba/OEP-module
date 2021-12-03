@@ -1,6 +1,6 @@
 #pragma once
-
 #include <iostream>
+#include <unordered_map>
 
 namespace bnb
 {
@@ -13,9 +13,18 @@ namespace bnb
         void use() const;
         void unuse() const;
 
-        unsigned int handle() const { return m_handle; }
+        void set_uniform(const char* name, int value) const;
+        void set_uniform(const char* name, float v1, float v2) const;
+        void set_uniform(const char* name, float v1, float v2, float v3, float v4) const;
+
+        unsigned int get_uniform_location(const char* name) const;
+        unsigned int handle() const
+        {
+            return m_handle;
+        }
 
     private:
         unsigned int m_handle;
+        mutable std::unordered_map<const void*, unsigned int> m_uniforms;
     };
-}
+} /* namespace bnb */

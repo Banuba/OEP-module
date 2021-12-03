@@ -17,10 +17,10 @@ namespace bnb::render
 
     public:
         /**
-        * First array determines texture orientation for vertical flip transformation
-        * Second array determines texture's orientation
-        * Third one determines the plane vertices` positions in correspondence to the texture coordinates
-        */
+         * First array determines texture orientation for vertical flip transformation
+         * Second array determines texture's orientation
+         * Third one determines the plane vertices` positions in correspondence to the texture coordinates
+         */
         static const float vertices[2][v_size][5 * 4];
 
         explicit frame_surface_handler(bnb_image_orientation_alias orientation, bool is_y_flip)
@@ -38,10 +38,10 @@ namespace bnb::render
 
             // clang-format off
 
-            unsigned int indices[] = {
-                // clang-format off
-                0, 1, 3, // first triangle
-                1, 2, 3  // second triangle
+                unsigned int indices[] = {
+                    // clang-format off
+                    0, 1, 3, // first triangle
+                    1, 2, 3  // second triangle
                 // clang-format on
             };
 
@@ -105,11 +105,11 @@ namespace bnb::render
             glBindVertexArray(0);
         }
 
-private:
+    private:
         uint32_t m_orientation = 0;
         uint32_t m_y_flip = 0;
         unsigned int m_vao = 0;
         unsigned int m_vbo = 0;
         unsigned int m_ebo = 0;
     };
-} // bnb::render
+} // namespace bnb::render

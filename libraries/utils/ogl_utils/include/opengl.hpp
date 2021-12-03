@@ -1,10 +1,12 @@
 #pragma once
+#include <utility>
 
 #include <preprocessor/build_macros.hpp>
 #if defined(ANDROID_BUILD_PART)
     #include <GLES3/gl3.h>
     #include "singleton.hpp"
 #else
+
     #include <interfaces/api.hpp>
     #if C_API_ENABLED
         #include <utility>

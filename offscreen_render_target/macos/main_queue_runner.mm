@@ -4,14 +4,11 @@
 
 void run_on_main_queue(std::function<void()> f)
 {
-    if ([NSThread isMainThread])
-    {
+    if ([NSThread isMainThread]) {
         f();
-    }
-    else
-    {
+    } else {
         dispatch_sync(dispatch_get_main_queue(), ^{
-            f(); 
+          f();
         });
     }
 }

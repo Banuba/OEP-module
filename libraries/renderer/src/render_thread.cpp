@@ -7,7 +7,9 @@ namespace bnb::render
     render_thread::render_thread(GLFWwindow* window, int32_t width, int32_t height)
         : m_window(window)
         , m_thread([this, width, height]() { thread_func(width, height); })
-        , m_cancellation_flag(false) {}
+        , m_cancellation_flag(false)
+    {
+    }
 
     render_thread::~render_thread()
     {
@@ -22,10 +24,10 @@ namespace bnb::render
         }
     }
 
-    void render_thread::update_data(int texture_id)
+    void render_thread::update_data(int texture_id, bool draw_gray)
     {
         if (m_renderer)
-            m_renderer->update_data(texture_id);
+            m_renderer->update_data(texture_id, draw_gray);
     }
 
     void render_thread::thread_func(int32_t width, int32_t height)
@@ -47,4 +49,4 @@ namespace bnb::render
         m_renderer.reset();
         glfwMakeContextCurrent(nullptr);
     }
-} // bnb::render
+} // namespace bnb::render
