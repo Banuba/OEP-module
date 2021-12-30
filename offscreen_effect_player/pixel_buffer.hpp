@@ -1,38 +1,53 @@
 #pragma once
 
-#include "offscreen_effect_player.hpp"
 #include <interfaces/pixel_buffer.hpp>
+#include <vector>
 
-namespace bnb
+namespace bnb::oep
 {
 
-    class offscreen_effect_player;
-    using oep_sptr = std::shared_ptr<offscreen_effect_player>;
-    using oep_wptr = std::weak_ptr<offscreen_effect_player>;
-
-    class pixel_buffer : public interfaces::pixel_buffer
+    class pixel_buffer : public bnb::oep::interfaces::pixel_buffer
     {
     public:
-        pixel_buffer(oep_sptr oep_sptr, uint32_t width, uint32_t height, bnb_image_orientation_alias orientation);
+        pixel_buffer(const std::vector<plane_data>& planes, bnb::oep::interfaces::image_format fmt, int32_t width, int32_t height);
+        ~pixel_buffer();
 
-        void lock() override;
-        void unlock() override;
-        bool is_locked() override;
+        bnb::oep::interfaces::image_format get_image_format() override;
+        int32_t get_plane_count() override;
 
-        void get_rgba(oep_image_ready_cb callback) override;
-        std::optional<bnb_full_image_alias> get_rgba() override;
-        void get_nv12(oep_image_ready_cb callback) override;
+        plane_sptr get_base_sptr() override;
+        plane_sptr get_base_sptr_of_plane(int32_t plane_num) override;
 
-        virtual void get_texture(oep_texture_cb callback) override;
+        int32_t get_bytes_per_pixel() override;
+        int32_t get_bytes_per_pixel_of_plane(int32_t plane_num) override;
+        int32_t get_bytes_per_row() override;
+        int32_t get_bytes_per_row_of_plane(int32_t plane_num) override;
+        int32_t get_width() override;
+        int32_t get_width_of_plane(int32_t plane_num) override;
+        int32_t get_height() override;
+        int32_t get_height_of_plane(int32_t plane_num) override;
 
     private:
-        oep_wptr m_oep_ptr;
-        uint8_t lock_count = 0;
+        struct image_format_info
+        {
+            int32_t planes_num{0}; /* [1..3] - number of planes */
+            int32_t pixel_sizes[3]{0, 0, 0};
+        }; /* image_format_info */
 
-        uint32_t m_width = 0;
-        uint32_t m_height = 0;
+        struct plane_data_extended : public plane_data
+        {
+            int32_t width{0};
+            int32_t height{0};
+            int32_t pixel_size{0};
+        }; /* struct plane_data_extended */
 
-        bnb_image_orientation_alias m_orientation;
-    }; /* class pixel_buffer            IMPLEMENTATION */
+        image_format_info get_image_format_info(bnb::oep::interfaces::image_format fmt);
+        void validate_plane_number(int32_t plane_num);
 
-} /* namespace bnb */
+    private:
+        bnb::oep::interfaces::image_format m_image_format;
+        int32_t m_plane_count{0};
+        plane_data_extended m_planes[3];
+    }; /* class image_data  */
+
+} /* namespace bnb::oep */

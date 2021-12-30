@@ -1,42 +1,31 @@
 #include "offscreen_effect_player.hpp"
-#include "offscreen_render_target.hpp"
 
 #include <iostream>
 
-namespace bnb
+namespace bnb::oep
 {
 
-    /* interfaces::offscreen_effect_player::create */
-    ioep_sptr interfaces::offscreen_effect_player::create(
-        const std::vector<std::string>& path_to_resources, const std::string& client_token, int32_t width, int32_t height, bool manual_audio, iort_sptr ort)
+    /* offscreen_effect_player::create  STATIC INTERFACE */
+    offscreen_effect_player_sptr bnb::oep::interfaces::offscreen_effect_player::create(effect_player_sptr ep, offscreen_render_target_sptr ort, int32_t width, int32_t height)
     {
-        if (ort == nullptr) {
-            return nullptr;
-        }
-
-        // we use "new" instead of "make_shared" because the constructor in "offscreen_effect_player" is private
-        return oep_sptr(new bnb::offscreen_effect_player(
-            path_to_resources, client_token, width, height, manual_audio, ort));
+        return std::make_shared<bnb::oep::offscreen_effect_player>(ep, ort, width, height);
     }
 
-    /* offscreen_effect_player::offscreen_effect_player     CONSTRUCTOR */
-    offscreen_effect_player::offscreen_effect_player(
-        const std::vector<std::string>& path_to_resources, const std::string& client_token, int32_t width, int32_t height, bool manual_audio, iort_sptr offscreen_render_target)
-        : oep_api(path_to_resources, client_token)
-        , m_ort(offscreen_render_target)
+    /* offscreen_effect_player::offscreen_effect_player */
+    offscreen_effect_player::offscreen_effect_player(effect_player_sptr ep, offscreen_render_target_sptr ort, int32_t width, int32_t height)
+        : m_ep(ep)
+        , m_ort(ort)
         , m_scheduler(1)
     {
-        oep_api::init(width, height, manual_audio);
-
+        m_current_frame = bnb::oep::interfaces::image_processing_result::create(m_ort);
         // MacOS GLFW requires window creation on main thread, so it is assumed that we are on main thread.
         auto task = [this, width, height]() {
             render_thread_id = std::this_thread::get_id();
-            m_ort->init();
+            m_ort->init(width, height);
             m_ort->activate_context();
-
-            oep_api::surface_created(width, height);
+            m_ep->surface_created(width, height);
             /* Only necessary if we want share context via GLFW on Windows */
-            ONLY_WIN32(m_ort->deactivate_context());
+            m_ort->deactivate_context();
         };
 
         auto future = m_scheduler.enqueue(task);
@@ -51,11 +40,10 @@ namespace bnb
         }
     }
 
-    /* offscreen_effect_player::~offscreen_effect_player    DESTRUCTOR */
+    /* offscreen_effect_player::~offscreen_effect_player */
     offscreen_effect_player::~offscreen_effect_player()
     {
-        oep_api::surface_destroyed();
-
+        m_ep->surface_destroyed();
         // Deinitialize offscreen render target, should be performed on render thread.
         auto task = [this]() {
             m_ort->deinit();
@@ -64,34 +52,28 @@ namespace bnb
     }
 
     /* offscreen_effect_player::process_image_async */
-    void offscreen_effect_player::process_image_async(
-        std::shared_ptr<bnb_full_image_alias> image, oep_pb_ready_cb callback, std::optional<interfaces::orient_format> target_orient)
+    void offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
     {
-        if (m_current_frame == nullptr) {
-            m_current_frame = std::make_shared<pixel_buffer>(shared_from_this(), image->get_format().width, image->get_format().height, image->get_format().orientation);
-        }
-
-        if (m_current_frame->is_locked()) {
-            ONLY_DEBUG(std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl);
-            return;
-        }
-
-        if (!target_orient.has_value()) {
+        if (!target_orientation.has_value()) {
             /* set default orientation */
-            target_orient = {image->get_format().orientation, true};
+            target_orientation = bnb::oep::interfaces::rotation::deg0;
         }
 
-        auto task = [this, image, callback, target_orient]() {
-            if (m_incoming_frame_queue_task_count == 1) {
+        auto task = [this, image, callback, input_rotation, target_orientation]() {
+            if (m_current_frame->is_locked()) {
+                std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
+            } else if (m_incoming_frame_queue_task_count == 1) {
                 m_current_frame->lock();
                 m_ort->activate_context();
                 m_ort->prepare_rendering();
-                oep_api::draw_image(image);
-                m_ort->orient_image(*target_orient);
+                m_ep->push_frame(image, input_rotation);
+                m_ep->draw();
+                m_ort->orient_image(*target_orientation);
                 callback(m_current_frame);
+                m_ort->deactivate_context();
                 m_current_frame->unlock();
             } else {
-                callback(std::nullopt);
+                callback(nullptr);
             }
             --m_incoming_frame_queue_task_count;
         };
@@ -100,37 +82,14 @@ namespace bnb
         m_scheduler.enqueue(task);
     }
 
-    /* offscreen_effect_player::process_image_rgba */
-    ipb_sptr offscreen_effect_player::process_image_rgba(
-        std::shared_ptr<bnb_full_image_alias> image,
-        std::optional<interfaces::orient_format> target_orient)
-    {
-        if (m_current_frame == nullptr) {
-            m_current_frame = std::make_shared<pixel_buffer>(shared_from_this(), image->get_format().width, image->get_format().height, image->get_format().orientation);
-        }
-
-        if (!target_orient.has_value()) {
-            target_orient = {image->get_format().orientation, true};
-        }
-
-        auto task = [this, image, target_orient]() {
-            m_ort->activate_context();
-            m_ort->prepare_rendering();
-            oep_api::draw_image(image);
-            m_ort->orient_image(*target_orient);
-            return m_current_frame;
-        };
-        return m_scheduler.enqueue(task).get();
-    }
-
     /* offscreen_effect_player::surface_changed */
     void offscreen_effect_player::surface_changed(int32_t width, int32_t height)
     {
         auto task = [this, width, height]() {
             m_ort->activate_context();
-            oep_api::surface_changed(width, height);
-            m_current_frame.reset();
+            m_ep->surface_changed(width, height);
             m_ort->surface_changed(width, height);
+            m_ort->deactivate_context();
         };
 
         m_scheduler.enqueue(task);
@@ -141,9 +100,28 @@ namespace bnb
     {
         auto task = [this, effect = effect_path]() {
             m_ort->activate_context();
-            oep_api::load_effect(effect);
+            m_ep->load_effect(effect);
+            m_ort->deactivate_context();
         };
         m_scheduler.enqueue(task);
+    }
+
+    /* offscreen_effect_player::unload_effect */
+    void offscreen_effect_player::unload_effect()
+    {
+        load_effect("");
+    }
+
+    /* offscreen_effect_player::pause */
+    void offscreen_effect_player::pause()
+    {
+        m_ep->pause();
+    }
+
+    /* offscreen_effect_player::resume */
+    void offscreen_effect_player::resume()
+    {
+        m_ep->resume();
     }
 
     /* offscreen_effect_player::call_js_method */
@@ -151,55 +129,10 @@ namespace bnb
     {
         auto task = [this, method = method, param = param]() {
             m_ort->activate_context();
-            oep_api::call_js_method(method, param);
+            m_ep->call_js_method(method, param);
+            m_ort->deactivate_context();
         };
         m_scheduler.enqueue(task);
     }
 
-    /* offscreen_effect_player::read_current_buffer */
-    void offscreen_effect_player::read_current_buffer(std::function<void(bnb::data_t data)> callback)
-    {
-        if (std::this_thread::get_id() == render_thread_id) {
-            callback(m_ort->read_current_buffer());
-            return;
-        }
-
-        oep_wptr this_ = shared_from_this();
-        auto task = [this_, callback]() {
-            if (auto this_sp = this_.lock()) {
-                callback(this_sp->m_ort->read_current_buffer());
-            }
-        };
-        m_scheduler.enqueue(task);
-    }
-
-    /* offscreen_effect_player::read_current_buffer */
-    bnb::data_t offscreen_effect_player::read_current_buffer()
-    {
-        if (std::this_thread::get_id() == render_thread_id) {
-            return m_ort->read_current_buffer();
-        }
-        auto task = [this]() {
-            return this->m_ort->read_current_buffer();
-        };
-        return m_scheduler.enqueue(task).get();
-    }
-
-    /* offscreen_effect_player::get_current_buffer_texture */
-    void offscreen_effect_player::get_current_buffer_texture(oep_texture_cb callback)
-    {
-        if (std::this_thread::get_id() == render_thread_id) {
-            callback(m_ort->get_current_buffer_texture());
-            return;
-        }
-
-        oep_wptr this_ = shared_from_this();
-        auto task = [this_, callback]() {
-            if (auto this_sp = this_.lock()) {
-                callback(this_sp->m_ort->get_current_buffer_texture());
-            }
-        };
-        m_scheduler.enqueue(task);
-    }
-
-} /* namespace bnb */
+} /* namespace bnb::oep */

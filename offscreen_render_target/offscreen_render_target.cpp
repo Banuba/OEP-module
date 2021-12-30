@@ -1,11 +1,36 @@
 #include "offscreen_render_target.hpp"
 
-#include <interfaces/api.hpp>
-
-namespace bnb
+namespace bnb::oep
 {
+    const int drawing_plane_vert_count = 4;
+    const int drawing_plane_count = 4;
+    const int drawing_plane_coords_per_vert = 5;
+    // clang-format off
+        static const float drawing_plane_coords[drawing_plane_coords_per_vert * drawing_plane_vert_count * drawing_plane_count] = {
+            /* verical flip 1 rotation 0deg */
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  /* top right */
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,  /* bottom right */
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* top left */
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* bottom left */
+            /* verical flip 1 rotation 90deg */
+            1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  /* top right */
+            1.0f,  1.0f, 0.0f, 0.0f, 1.0f,  /* bottom right */
+            -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* top left */
+            -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, /* bottom left */
+            /* verical flip 1 rotation 180deg */
+            1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  /* top right */
+            1.0f,  1.0f, 0.0f, 0.0f, 0.0f,  /* bottom right */
+            -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* top left */
+            -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, /* bottom left */
+            /* verical flip 1 rotation 270deg */
+            1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  /* top right */
+            1.0f,  1.0f, 0.0f, 1.0f, 0.0f,  /* bottom right */
+            -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* top left */
+            -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, /* bottom left */
+        };
+    // clang-format on
 
-    const char* vs_default_base =
+    const char* shader_vec_prog =
         " precision highp float; \n "
         " layout (location = 0) in vec3 aPos; \n"
         " layout (location = 1) in vec2 aTexCoord; \n"
@@ -16,7 +41,7 @@ namespace bnb
         " vTexCoord = aTexCoord; \n"
         "}\n";
 
-    const char* ps_default_base =
+    const char* shader_frag_prog =
         "precision highp float;\n"
         "in vec2 vTexCoord;\n"
         "out vec4 FragColor;\n"
@@ -26,248 +51,78 @@ namespace bnb
         "FragColor = texture(uTexture, vTexCoord);\n"
         "}\n";
 
-    class ort_frame_surface_handler
+    /* interfaces::offscreen_render_target::create */
+    offscreen_render_target_sptr bnb::oep::interfaces::offscreen_render_target::create(render_context_sptr rc)
     {
-    private:
-        static const auto v_size = static_cast<uint32_t>(BNB_DEG_270_ALIAS) + 1;
-
-    public:
-        /**
-         * First array determines texture orientation for vertical flip transformation
-         * Second array determines texture's orientation
-         * Third one determines the plane vertices` positions in correspondence to the texture coordinates
-         */
-        static const float vertices[2][v_size][5 * 4];
-
-        explicit ort_frame_surface_handler(bnb_image_orientation_alias orientation, bool is_y_flip)
-            : m_orientation(static_cast<uint32_t>(orientation))
-            , m_y_flip(static_cast<uint32_t>(is_y_flip))
-        {
-            glGenVertexArrays(1, &m_vao);
-            glGenBuffers(1, &m_vbo);
-            glGenBuffers(1, &m_ebo);
-
-            glBindVertexArray(m_vao);
-
-            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[m_y_flip][m_orientation]), vertices[m_y_flip][m_orientation], GL_STATIC_DRAW);
-
-            // clang-format off
-
-            unsigned int indices[] = {
-                // clang-format off
-                0, 1, 3, // first triangle
-                1, 2, 3  // second triangle
-                // clang-format on
-            };
-
-            // clang-format on
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-            // position attribute
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) 0);
-            glEnableVertexAttribArray(0);
-            // texture coord attribute
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
-
-            glBindVertexArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        }
-
-        virtual ~ort_frame_surface_handler() final
-        {
-            if (m_vao != 0)
-                glDeleteVertexArrays(1, &m_vao);
-
-            if (m_vbo != 0)
-                glDeleteBuffers(1, &m_vbo);
-
-            if (m_ebo != 0)
-                glDeleteBuffers(1, &m_ebo);
-
-            m_vao = 0;
-            m_vbo = 0;
-            m_ebo = 0;
-        }
-
-        ort_frame_surface_handler(const ort_frame_surface_handler&) = delete;
-        ort_frame_surface_handler(ort_frame_surface_handler&&) = delete;
-
-        ort_frame_surface_handler& operator=(const ort_frame_surface_handler&) = delete;
-        ort_frame_surface_handler& operator=(ort_frame_surface_handler&&) = delete;
-
-        void update_vertices_buffer()
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[m_y_flip][m_orientation]), vertices[m_y_flip][m_orientation], GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
-
-        void set_orientation(bnb_image_orientation_alias orientation)
-        {
-            if (m_orientation != static_cast<uint32_t>(orientation)) {
-                m_orientation = static_cast<uint32_t>(orientation);
-            }
-        }
-
-        void set_y_flip(bool y_flip)
-        {
-            if (m_y_flip != static_cast<uint32_t>(y_flip)) {
-                m_y_flip = static_cast<uint32_t>(y_flip);
-            }
-        }
-
-        void draw()
-        {
-            glBindVertexArray(m_vao);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        }
-
-    private:
-        uint32_t m_orientation = 0;
-        uint32_t m_y_flip = 0;
-        unsigned int m_vao = 0;
-        unsigned int m_vbo = 0;
-        unsigned int m_ebo = 0;
-    }; /* class bnb::ort_frame_surface_handler */
-
-    // clang-format off
-    const float ort_frame_surface_handler::vertices[2][ort_frame_surface_handler::v_size][5 * 4] =
-        {{ /* verical flip 0 */
-            {
-                // positions        // texture coords
-                1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // top right
-                1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // bottom right
-                -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // bottom left
-                -1.0f,  1.0f, 0.0f, 0.0f, 0.0f,  // top left
-            },
-            {
-                // positions        // texture coords
-                1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // top right
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-                -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // bottom left
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,  // top left
-            },
-            {
-                // positions        // texture coords
-                1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // top right
-                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom right
-                -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom left
-                -1.0f,  1.0f, 0.0f, 1.0f, 1.0f,  // top left
-            },
-            {
-                // positions        // texture coords
-                1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // top right
-                1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // bottom right
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
-                -1.0f,  1.0f, 0.0f, 1.0f, 0.0f,  // top left
-            }
-            },
-            { /* verical flip 1 */
-            {
-                // positions        // texture coords
-                1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top right
-                1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-                -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // bottom left
-                -1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  // top left
-            },
-            {
-                // positions        // texture coords
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // top right
-                1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // bottom right
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // bottom left
-                -1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // top left
-            },
-            {
-                // positions        // texture coords
-                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // top right
-                1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // bottom right
-                -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // bottom left
-                -1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // top left
-            },
-            {
-                // positions        // texture coords
-                1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top right
-                1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // bottom right
-                -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // bottom left
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // top left
-            }
-        }};
-    // clang-format on
-} /* namespace bnb */
-
-namespace bnb
-{
-
-    /* offscreen_render_target::offscreen_render_target     CONSTRUCTOR */
-    offscreen_render_target::offscreen_render_target(uint32_t width, uint32_t height)
-        : m_width(width)
-        , m_height(height)
-    {
-        create_context();
+        return offscreen_render_target_sptr(new bnb::oep::offscreen_render_target(rc));
     }
 
-    /* offscreen_render_target::offscreen_render_target     DESTRUCTOR */
+    /* offscreen_render_target::offscreen_render_target */
+    offscreen_render_target::offscreen_render_target(render_context_sptr rc)
+        : m_rc(rc)
+    {
+    }
+
+    /* offscreen_render_target::~offscreen_render_target */
     offscreen_render_target::~offscreen_render_target()
     {
-    }
-
-    /* offscreen_render_target::delete_textures */
-    void offscreen_render_target::delete_textures()
-    {
-        if (m_offscreen_render_texture != 0) {
-            GL_CALL(glDeleteTextures(1, &m_offscreen_render_texture));
-            m_offscreen_render_texture = 0;
-        }
-        if (m_offscreen_post_processuing_render_texture != 0) {
-            GL_CALL(glDeleteTextures(1, &m_offscreen_post_processuing_render_texture));
-            m_offscreen_post_processuing_render_texture = 0;
-        }
+        deinit();
     }
 
     /* offscreen_render_target::init */
-    void offscreen_render_target::init()
+    void offscreen_render_target::init(int32_t width, int32_t height)
     {
-        activate_context();
+        m_width = width;
+        m_height = height;
 
         std::call_once(m_init_flag, [this]() {
-            load_glad_functions();
+            m_rc->create_context();
+            activate_context();
+            m_shader = std::make_unique<program>(nullptr, shader_vec_prog, shader_frag_prog);
+
+            /* create and bind drawing geometry */
+            GL_CALL(glGenVertexArrays(1, &m_vao));
+            GL_CALL(glBindVertexArray(m_vao));
+            GL_CALL(glGenBuffers(1, &m_vbo));
+            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
+            GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(drawing_plane_coords), drawing_plane_coords, GL_STATIC_DRAW));
+            GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * drawing_plane_coords_per_vert, nullptr));
+            GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * drawing_plane_coords_per_vert, reinterpret_cast<void*>(sizeof(float) * 3)));
+            GL_CALL(glEnableVertexAttribArray(0));
+            GL_CALL(glEnableVertexAttribArray(1));
+            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+            GL_CALL(glBindVertexArray(0));
 
             GL_CALL(glGenFramebuffers(1, &m_framebuffer));
             GL_CALL(glGenFramebuffers(1, &m_post_processing_framebuffer));
-
-            m_program = std::make_unique<program>("OrientationChange", vs_default_base, ps_default_base);
-            m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(BNB_DEG_0_ALIAS, false);
+            deactivate_context();
         });
-
-        deactivate_context();
     }
 
     /* offscreen_render_target::deinit */
     void offscreen_render_target::deinit()
     {
-        activate_context();
-
         std::call_once(m_deinit_flag, [this]() {
-            m_program.reset();
-            m_frame_surface_handler.reset();
-            if (m_framebuffer != 0) {
+            activate_context();
+            if (glIsBuffer(m_vbo)) {
+                glDeleteBuffers(1, &m_vbo);
+                m_vbo = 0;
+            }
+            if (glIsVertexArray(m_vao)) {
+                glDeleteVertexArrays(1, &m_vao);
+                m_vao = 0;
+            }
+            if (glIsFramebuffer(m_framebuffer)) {
                 GL_CALL(glDeleteFramebuffers(1, &m_framebuffer));
                 m_framebuffer = 0;
             }
-            if (m_post_processing_framebuffer != 0) {
+            if (glIsFramebuffer(m_post_processing_framebuffer)) {
                 GL_CALL(glDeleteFramebuffers(1, &m_post_processing_framebuffer));
                 m_post_processing_framebuffer = 0;
             }
             delete_textures();
+            deactivate_context();
         });
-
-        deactivate_context();
     }
 
     /* offscreen_render_target::surface_changed */
@@ -275,47 +130,21 @@ namespace bnb
     {
         m_width = width;
         m_height = height;
-        ort_api::set_window_size(width, height);
         activate_context();
         delete_textures();
         deactivate_context();
     }
 
-    /* offscreen_render_target::create_context */
-    void offscreen_render_target::create_context()
+    /* offscreen_render_target::activate_context */
+    void offscreen_render_target::activate_context()
     {
-        ort_api::create_context(m_width, m_height);
+        m_rc->activate();
     }
 
     /* offscreen_render_target::deactivate_context */
     void offscreen_render_target::deactivate_context()
     {
-        ort_api::deactivate_context();
-    }
-
-    /* offscreen_render_target::activate_context */
-    void offscreen_render_target::activate_context()
-    {
-        ort_api::activate_context();
-    }
-
-    /* offscreen_render_target::load_glad_functions */
-    void offscreen_render_target::load_glad_functions()
-    {
-        ort_api::load_functions();
-    }
-
-    /* offscreen_render_target::generate_texture */
-    void offscreen_render_target::generate_texture(GLuint& texture)
-    {
-        GL_CALL(glGenTextures(1, &texture));
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
-
-        GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MIN_FILTER), GL_NEAREST));
-        GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MAG_FILTER), GL_NEAREST));
-        GL_CALL(glTexParameterf(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_WRAP_S), GLfloat(GL_CLAMP_TO_EDGE)));
-        GL_CALL(glTexParameterf(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_WRAP_T), GLfloat(GL_CLAMP_TO_EDGE)));
+        m_rc->deactivate();
     }
 
     /* offscreen_render_target::prepare_rendering */
@@ -334,6 +163,102 @@ namespace bnb
             return;
         }
         m_active_texture = m_offscreen_render_texture;
+        m_last_framebuffer = m_offscreen_render_texture;
+    }
+
+    /* offscreen_render_target::orient_image */
+    void offscreen_render_target::orient_image(bnb::oep::interfaces::rotation orient)
+    {
+        GL_CALL(glFlush());
+
+        if (orient == bnb::oep::interfaces::rotation::deg0) {
+            return;
+        }
+
+        using ns = bnb::oep::interfaces::rotation;
+        int32_t draw_indent{0};
+        switch (orient) {
+            case ns::deg0:
+                draw_indent = 0 * drawing_plane_vert_count;
+                break;
+            case ns::deg90:
+                draw_indent = 1 * drawing_plane_vert_count;
+                break;
+            case ns::deg180:
+                draw_indent = 2 * drawing_plane_vert_count;
+                break;
+            case ns::deg270:
+                draw_indent = 3 * drawing_plane_vert_count;
+                break;
+            default:
+                break;
+        }
+
+        prepare_post_processing_rendering();
+        m_shader->use();
+        /* bind drawing geometry */
+        glBindVertexArray(m_vao);
+        glDrawArrays(GL_TRIANGLE_STRIP, draw_indent, drawing_plane_vert_count);
+        m_shader->unuse();
+
+        GL_CALL(glFlush());
+    }
+
+    /* offscreen_render_target::read_current_buffer */
+    pixel_buffer_sptr offscreen_render_target::read_current_buffer(bnb::oep::interfaces::image_format format)
+    {
+        activate_context();
+
+        using ns = bnb::oep::interfaces::image_format;
+        switch (format) {
+            case ns::bpc8_rgb:
+            case ns::bpc8_bgr:
+            case ns::bpc8_rgba:
+            case ns::bpc8_bgra:
+            case ns::bpc8_argb:
+                return read_current_buffer_bpc8(format);
+                break;
+            case ns::i420_bt601_full:
+            case ns::i420_bt601_video:
+            case ns::i420_bt709_full:
+            case ns::i420_bt709_video:
+                return read_current_buffer_i420(format);
+                break;
+            default:
+                return nullptr;
+        }
+    }
+
+    /* offscreen_render_target::get_current_buffer_texture */
+    rendered_texture_t offscreen_render_target::get_current_buffer_texture()
+    {
+        return reinterpret_cast<rendered_texture_t>(m_active_texture);
+    }
+
+    /* offscreen_render_target::generate_texture */
+    void offscreen_render_target::generate_texture(GLuint& texture)
+    {
+        GL_CALL(glGenTextures(1, &texture));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
+
+        GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MIN_FILTER), GL_NEAREST));
+        GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MAG_FILTER), GL_NEAREST));
+        GL_CALL(glTexParameterf(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_WRAP_S), GLfloat(GL_CLAMP_TO_EDGE)));
+        GL_CALL(glTexParameterf(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_WRAP_T), GLfloat(GL_CLAMP_TO_EDGE)));
+    }
+
+    /* offscreen_render_target::delete_textures */
+    void offscreen_render_target::delete_textures()
+    {
+        if (m_offscreen_render_texture != 0) {
+            GL_CALL(glDeleteTextures(1, &m_offscreen_render_texture));
+            m_offscreen_render_texture = 0;
+        }
+        if (m_offscreen_post_processuing_render_texture != 0) {
+            GL_CALL(glDeleteTextures(1, &m_offscreen_post_processuing_render_texture));
+            m_offscreen_post_processuing_render_texture = 0;
+        }
     }
 
     /* offscreen_render_target::prepare_post_processing_rendering */
@@ -342,7 +267,7 @@ namespace bnb
         if (m_offscreen_post_processuing_render_texture == 0) {
             generate_texture(m_offscreen_post_processuing_render_texture);
         }
-        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, m_post_processing_framebuffer));
+        GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_post_processing_framebuffer));
         GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_offscreen_post_processuing_render_texture, 0));
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -356,62 +281,108 @@ namespace bnb
         GL_CALL(glActiveTexture(GLenum(GL_TEXTURE0)));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_offscreen_render_texture));
         m_active_texture = m_offscreen_post_processuing_render_texture;
+        m_last_framebuffer = m_post_processing_framebuffer;
     }
 
-    /* offscreen_render_target::orient_image */
-    void offscreen_render_target::orient_image(interfaces::orient_format orient)
+    /* offscreen_render_target::read_current_buffer_bpc8 */
+    pixel_buffer_sptr offscreen_render_target::read_current_buffer_bpc8(bnb::oep::interfaces::image_format format_hint)
     {
-        GL_CALL(glFlush());
-
-        if (orient.orientation == BNB_DEG_0_ALIAS && !orient.is_y_flip) {
-            return;
+        using ns = bnb::oep::interfaces::image_format;
+        int32_t pixel_size{0};
+        GLenum gl_format{0};
+        switch (format_hint) {
+            case ns::bpc8_rgb:
+                pixel_size = 3;
+                gl_format = GL_RGB;
+                break;
+            case ns::bpc8_bgr:
+                pixel_size = 3;
+                gl_format = GL_BGR;
+                break;
+            case ns::bpc8_rgba:
+                pixel_size = 4;
+                gl_format = GL_RGBA;
+                break;
+            case ns::bpc8_bgra:
+                pixel_size = 4;
+                gl_format = GL_BGRA;
+                break;
+            default:
+                return nullptr;
         }
-
-        if (m_program == nullptr) {
-            std::cout << "[ERROR] Not initialization m_program" << std::endl;
-            return;
-        }
-        if (m_frame_surface_handler == nullptr) {
-            std::cout << "[ERROR] Not initialization m_frame_surface_handler" << std::endl;
-            return;
-        }
-
-        prepare_post_processing_rendering();
-        m_program->use();
-        m_frame_surface_handler->set_orientation(orient.orientation);
-        m_frame_surface_handler->set_y_flip(orient.is_y_flip);
-        // Call once for perf
-        m_frame_surface_handler->update_vertices_buffer();
-        m_frame_surface_handler->draw();
-        m_program->unuse();
-
-        GL_CALL(glFlush());
-    }
-
-    /* offscreen_render_target::read_current_buffer */
-    data_t offscreen_render_target::read_current_buffer()
-    {
-        activate_context();
 
         size_t size = m_width * m_height * 4;
-        data_t data = data_t{std::make_unique<uint8_t[]>(size), size};
+        auto plane_storage = std::shared_ptr<uint8_t>(new uint8_t[size]);
+        bnb::oep::interfaces::pixel_buffer::plane_data bpc8_plane{plane_storage, size, m_width * 4};
 
-        GL_CALL(glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, data.data.get()));
-        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+        glBindFramebuffer(GL_FRAMEBUFFER, m_last_framebuffer);
+        GL_CALL(glReadPixels(0, 0, m_width, m_height, gl_format, GL_UNSIGNED_BYTE, plane_storage.get()));
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        return data;
+        std::vector<bnb::oep::interfaces::pixel_buffer::plane_data> planes{bpc8_plane};
+        return bnb::oep::interfaces::pixel_buffer::create(planes, format_hint, m_width, m_height);
     }
 
-    /* offscreen_render_target::get_current_buffer_texture */
-    int offscreen_render_target::get_current_buffer_texture()
+    /* offscreen_render_target::read_current_buffer_i420 */
+    pixel_buffer_sptr offscreen_render_target::read_current_buffer_i420(bnb::oep::interfaces::image_format format_hint)
     {
-        return m_active_texture;
+        using ns = bnb::oep::interfaces::image_format;
+        using ns_cvt = bnb::oep::converter::yuv_converter;
+        ns_cvt::standard std{ns_cvt::standard::bt601};
+        ns_cvt::range rng{ns_cvt::range::full_range};
+        switch (format_hint) {
+            case ns::i420_bt601_full:
+                break;
+            case ns::i420_bt601_video:
+                rng = ns_cvt::range::video_range;
+                break;
+            case ns::i420_bt709_full:
+                std = ns_cvt::standard::bt709;
+                break;
+            case ns::i420_bt709_video:
+                std = ns_cvt::standard::bt709;
+                rng = ns_cvt::range::video_range;
+                break;
+            default:
+                return nullptr;
+        }
+
+        if (m_yuv_i420_converter == nullptr) {
+            m_yuv_i420_converter = std::make_unique<bnb::oep::converter::yuv_converter>();
+            m_yuv_i420_converter->set_drawing_orientation(ns_cvt::rotation::deg_0, true);
+        }
+
+        m_yuv_i420_converter->set_convert_standard(std, rng);
+
+        auto do_nothing_deleter_uint8 = [](uint8_t*) { /* DO NOTHING */ };
+        auto default_deleter_uint8 = std::default_delete<uint8_t>();
+
+        ns_cvt::yuv_data i420_planes_data;
+        /* allocate needed memory for store */
+        int32_t clamped_width = (m_width + 7) & ~7; /* alhoritm specific */
+        i420_planes_data.size = clamped_width * (m_height + (m_height + 1) / 2);
+        i420_planes_data.data = std::shared_ptr<uint8_t>(new uint8_t[i420_planes_data.size], do_nothing_deleter_uint8);
+
+        /* convert to i420 */
+        uint32_t gl_texture = static_cast<uint32_t>(reinterpret_cast<uint64_t>(get_current_buffer_texture()));
+        m_yuv_i420_converter->convert(gl_texture, m_width, m_height, i420_planes_data);
+
+        /* save data */
+        using ns_pb = bnb::oep::interfaces::pixel_buffer;
+        ns_pb::plane_sptr y_plane_data(i420_planes_data.y_plane_data, do_nothing_deleter_uint8);
+        ns_pb::plane_sptr u_plane_data(i420_planes_data.u_plane_data, do_nothing_deleter_uint8);
+        ns_pb::plane_sptr v_plane_data(i420_planes_data.v_plane_data, do_nothing_deleter_uint8);
+        size_t y_plane_size(static_cast<size_t>(i420_planes_data.u_plane_data - i420_planes_data.y_plane_data));
+        size_t v_u_planes_diff(static_cast<size_t>(i420_planes_data.v_plane_data - i420_planes_data.u_plane_data));
+        size_t u_plane_size(i420_planes_data.size - y_plane_size - v_u_planes_diff);
+        size_t v_plane_size(u_plane_size);
+        ns_pb::plane_data y_plane{y_plane_data, y_plane_size, i420_planes_data.y_plane_stride};
+        ns_pb::plane_data u_plane{u_plane_data, u_plane_size, i420_planes_data.u_plane_stride};
+        ns_pb::plane_data v_plane{v_plane_data, v_plane_size, i420_planes_data.v_plane_stride};
+
+        std::vector<ns_pb::plane_data> planes{y_plane, u_plane, v_plane};
+
+        return ns_pb::create(planes, format_hint, clamped_width, m_height, [default_deleter_uint8](auto* pb) { default_deleter_uint8(pb->get_base_sptr().get()); });
     }
 
-    /* offscreen_render_target::get_sharing_context */
-    interfaces::oep_sharing_context offscreen_render_target::get_sharing_context()
-    {
-        return ort_api::get_context_raw_ptr();
-    }
-
-} /* namespace bnb */
+} /* namespace bnb::oep */
