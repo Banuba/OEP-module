@@ -21,8 +21,8 @@ namespace bnb::oep
     }; /* struct camera::impl */
 
     /* camera::camera */
-    camera::camera(const bnb::oep::interfaces::camera::push_frame_cb_t& cb)
-        : bnb::oep::interfaces::camera(cb)
+    camera::camera(bnb::oep::interfaces::camera::push_frame_cb_t cb)
+        : m_push_frame_cb(cb)
         , m_impl(std::make_unique<impl>())
     {
         constexpr auto camera_width = 1280;
@@ -99,13 +99,7 @@ namespace bnb::oep
     /* interfaces::camera::create */
     camera_sptr bnb::oep::interfaces::camera::create(bnb::oep::interfaces::camera::push_frame_cb_t cb, size_t index)
     {
-        return std::make_shared<bnb::oep::camera::camera>(cb);
-    }
-
-    /* camera::camera */
-    camera::camera(push_frame_cb_t cb)
-        : m_push_frame_cb(cb)
-    {
+        return std::make_shared<bnb::oep::camera>(cb);
     }
 
     /* camera::get_connected_devices */
