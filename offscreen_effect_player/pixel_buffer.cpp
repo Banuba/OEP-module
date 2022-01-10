@@ -1,141 +1,169 @@
 #include "pixel_buffer.hpp"
 
-#include <iostream>
-#include <libyuv.h>
+#include <stdexcept>
 
-namespace bnb
+namespace bnb::oep
 {
 
+    /* interfaces::pixel_buffer::create */
+    pixel_buffer_sptr bnb::oep::interfaces::pixel_buffer::create(const std::vector<plane_data>& planes, image_format fmt, int32_t width, int32_t height, std::function<void(bnb::oep::interfaces::pixel_buffer*)> deleter)
+    {
+        return pixel_buffer_sptr(new bnb::oep::pixel_buffer(planes, fmt, width, height), deleter);
+    }
+
     /* pixel_buffer::pixel_buffer */
-    pixel_buffer::pixel_buffer(oep_sptr oep_sptr, uint32_t width, uint32_t height, bnb_image_orientation_alias orientation)
-        : m_oep_ptr(oep_sptr)
-        , m_width(width)
-        , m_height(height)
-        , m_orientation(orientation)
+    pixel_buffer::pixel_buffer(const std::vector<plane_data>& planes, bnb::oep::interfaces::image_format fmt, int32_t width, int32_t height)
     {
-    }
-
-    /* pixel_buffer::lock */
-    void pixel_buffer::lock()
-    {
-        ++lock_count;
-    }
-
-    /* pixel_buffer::unlock */
-    void pixel_buffer::unlock()
-    {
-        if (lock_count > 0) {
-            --lock_count;
-            return;
+        auto info = bnb::oep::pixel_buffer::get_image_format_info(fmt);
+        if (info.planes_num != planes.size()) {
+            throw std::runtime_error("[ERROR] The number of planes is strictly defined for: bpc8 - 1, nv12 - 2, i420 - 3");
         }
 
-        throw std::runtime_error("pixel_buffer already unlocked");
-    }
-
-    /* pixel_buffer::is_locked */
-    bool pixel_buffer::is_locked()
-    {
-        if (lock_count == 0) {
-            return false;
-        }
-        return true;
-    }
-
-    /* pixel_buffer::get_rgba */
-    void pixel_buffer::get_rgba(oep_image_ready_cb callback)
-    {
-        if (!is_locked()) {
-            std::cout << "[WARNING] The pixel buffer must be locked" << std::endl;
-            callback(std::nullopt);
-        }
-
-        if (auto oep_sp = m_oep_ptr.lock()) {
-            auto convert_callback = [this, callback](data_t data) {
-#if C_API_ENABLED
-                bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
-                bnb_pixel_format_t pxfmt{BNB_RGBA};
-                image_wrapper img(imfmt, pxfmt, data.data.get(), m_width * 4);
-
-                callback(img);
-#elif CPP_API_ENABLED
-                bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
-                auto bpc8 = bpc8_image_t(color_plane_weak(data.data.get()), interfaces::pixel_format::rgba, frm);
-                callback(full_image_t(std::move(bpc8)));
-#endif /* CPP_API_ENABLED */
-            };
-
-            oep_sp->read_current_buffer(convert_callback);
-        } else {
-            std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
+        static const int32_t plane_size_divider[3]{1, 2, 2};
+        m_image_format = fmt;
+        m_plane_count = info.planes_num;
+        for (int i = 0; i < m_plane_count; i++) {
+            m_planes[i].data = planes[i].data;
+            m_planes[i].size = planes[i].size;
+            m_planes[i].bytes_per_row = planes[i].bytes_per_row;
+            m_planes[i].width = width / plane_size_divider[i];
+            m_planes[i].height = height / plane_size_divider[i];
+            m_planes[i].pixel_size = info.pixel_sizes[i];
         }
     }
 
-    /* pixel_buffer::get_rgba */
-    std::optional<bnb_full_image_alias> pixel_buffer::get_rgba()
+    /* pixel_buffer::~pixel_buffer */
+    pixel_buffer::~pixel_buffer()
     {
-        if (auto oep_sp = m_oep_ptr.lock()) {
-            data_t data = oep_sp->read_current_buffer();
-#if C_API_ENABLED
-            bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
-            bnb_pixel_format_t pxfmt{BNB_RGBA};
-            image_wrapper img(imfmt, pxfmt, data.data.get(), m_width * 4);
-            return img;
-#elif CPP_API_ENABLED
-            bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
-            auto bpc8 = bpc8_image_t(color_plane_weak(data.data.get()), interfaces::pixel_format::rgba, frm);
-            auto img = full_image_t(std::move(bpc8));
-            return img;
-#endif /* CPP_API_ENABLED */
-        } else {
-            std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
-            return std::nullopt;
+    }
+
+    /* pixel_buffer::get_image_format */
+    bnb::oep::interfaces::image_format pixel_buffer::get_image_format()
+    {
+        return m_image_format;
+    }
+
+    /* pixel_buffer::get_plane_count */
+    int32_t pixel_buffer::get_plane_count()
+    {
+        return m_plane_count;
+    }
+
+    /* pixel_buffer::get_base_sptr */
+    bnb::oep::interfaces::pixel_buffer::plane_sptr pixel_buffer::get_base_sptr()
+    {
+        return get_base_sptr_of_plane(0);
+    }
+
+    /* pixel_buffer::get_base_sptr_of_plane */
+    bnb::oep::interfaces::pixel_buffer::plane_sptr pixel_buffer::get_base_sptr_of_plane(int32_t plane_num)
+    {
+        validate_plane_number(plane_num);
+        return m_planes[plane_num].data;
+    }
+
+    /* pixel_buffer::get_bytes_per_pixel */
+    int32_t pixel_buffer::get_bytes_per_pixel()
+    {
+        return get_bytes_per_pixel_of_plane(0);
+    }
+
+    /* pixel_buffer::get_bytes_per_pixel_of_plane */
+    int32_t pixel_buffer::get_bytes_per_pixel_of_plane(int32_t plane_num)
+    {
+        validate_plane_number(plane_num);
+        return m_planes[plane_num].pixel_size;
+    }
+
+    /* pixel_buffer::get_bytes_per_row */
+    int32_t pixel_buffer::get_bytes_per_row()
+    {
+        return get_bytes_per_row_of_plane(0);
+    }
+
+    /* pixel_buffer::get_bytes_per_row_of_plane */
+    int32_t pixel_buffer::get_bytes_per_row_of_plane(int32_t plane_num)
+    {
+        validate_plane_number(plane_num);
+        return m_planes[plane_num].bytes_per_row;
+    }
+
+    /* pixel_buffer::get_width */
+    int32_t pixel_buffer::get_width()
+    {
+        return get_width_of_plane(0);
+    }
+
+    /* pixel_buffer::get_width_of_plane */
+    int32_t pixel_buffer::get_width_of_plane(int32_t plane_num)
+    {
+        validate_plane_number(plane_num);
+        return m_planes[plane_num].width;
+    }
+
+    /* pixel_buffer::get_height */
+    int32_t pixel_buffer::get_height()
+    {
+        return get_height_of_plane(0);
+    }
+
+    /* pixel_buffer::get_height_of_plane */
+    int32_t pixel_buffer::get_height_of_plane(int32_t plane_num)
+    {
+        validate_plane_number(plane_num);
+        return m_planes[plane_num].height;
+    }
+
+    /* pixel_buffer::get_image_format_info */
+    pixel_buffer::image_format_info pixel_buffer::get_image_format_info(bnb::oep::interfaces::image_format fmt)
+    {
+        image_format_info ret;
+        using ns = bnb::oep::interfaces::image_format;
+        switch (fmt) {
+            case ns::bpc8_rgb:
+            case ns::bpc8_bgr:
+                ret.planes_num = 1;
+                ret.pixel_sizes[0] = 3;
+                break;
+            case ns::bpc8_rgba:
+            case ns::bpc8_bgra:
+            case ns::bpc8_argb:
+                ret.planes_num = 1;
+                ret.pixel_sizes[0] = 4;
+                break;
+            case ns::nv12_bt601_full:
+            case ns::nv12_bt601_video:
+            case ns::nv12_bt709_full:
+            case ns::nv12_bt709_video:
+                ret.planes_num = 2;
+                ret.pixel_sizes[0] = 1;
+                ret.pixel_sizes[1] = 2;
+                break;
+            case ns::i420_bt601_full:
+            case ns::i420_bt601_video:
+            case ns::i420_bt709_full:
+            case ns::i420_bt709_video:
+                ret.planes_num = 3;
+                ret.pixel_sizes[0] = 1;
+                ret.pixel_sizes[1] = 1;
+                ret.pixel_sizes[2] = 1;
+                break;
+            default:
+                ret.planes_num = 0;
+                ret.pixel_sizes[0] = 0;
+                ret.pixel_sizes[1] = 0;
+                ret.pixel_sizes[2] = 0;
+                break;
+        }
+        return ret;
+    }
+
+    /* pixel_buffer::validate_plane_number */
+    void pixel_buffer::validate_plane_number(int32_t plane_num)
+    {
+        if (plane_num < 0 || plane_num >= m_plane_count) {
+            throw std::runtime_error("[ERROR] Invalid plane number. 'plane_num' must be in range [0..2].");
         }
     }
 
-    /* pixel_buffer::get_nv12 */
-    void pixel_buffer::get_nv12(oep_image_ready_cb callback)
-    {
-        if (!is_locked()) {
-            std::cout << "[WARNING] The pixel buffer must be locked" << std::endl;
-            callback(std::nullopt);
-        }
-
-        if (auto oep_sp = m_oep_ptr.lock()) {
-            auto convert_callback = [this, callback](data_t data) {
-                std::vector<uint8_t> y_plane(m_width * m_height);
-                std::vector<uint8_t> uv_plane((m_width / 2 * m_height / 2) * 2);
-
-                libyuv::ABGRToNV12(data.data.get(), m_width * 4, y_plane.data(), m_width, uv_plane.data(), m_width, m_width, m_height);
-#if C_API_ENABLED
-                bnb_image_format_t imfmt{m_width, m_height, m_orientation, false, 0};
-                image_wrapper img(imfmt, y_plane.data(), m_width, uv_plane.data(), m_width / 2);
-
-                callback(img);
-#elif CPP_API_ENABLED
-                bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
-
-                callback(full_image_t(yuv_image_t(color_plane_vector(y_plane), color_plane_vector(uv_plane), frm)));
-#endif /* CPP_API_ENABLED */
-            };
-
-            oep_sp->read_current_buffer(convert_callback);
-        } else {
-            std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
-        }
-    }
-
-    /* pixel_buffer::get_texture */
-    void pixel_buffer::get_texture(oep_texture_cb callback)
-    {
-        if (!is_locked()) {
-            std::cout << "[WARNING] The pixel buffer must be locked" << std::endl;
-            callback(std::nullopt);
-        }
-        if (auto oep_sp = m_oep_ptr.lock()) {
-            oep_sp->get_current_buffer_texture(callback);
-        } else {
-            std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
-        }
-    }
-
-} /* namespace bnb */
+} /* namespace bnb::oep */

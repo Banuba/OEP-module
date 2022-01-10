@@ -1,11 +1,22 @@
-SET (OEP_SUBMODULE_DIR      ${CMAKE_CURRENT_LIST_DIR})
+# if option "USE_BNB_OEP_PIXEL_BUFFER" is ON ->             target "bnb_oep_pixel_buffer_target" will be available
+# if option "USE_BNB_OEP_IMAGE_PROCESSING_RESULT" is ON ->  target "bnb_oep_image_processing_result_target" will be available
+# if option "USE_BNB_OEP_OFFSCREEN_EFFECT_PLAYER" is ON ->  target "bnb_oep_offscreen_effect_player_target" will be available
+# if option "USE_BNB_OEP_OFFSCREEN_RENDER_TARGET" is ON ->  target "bnb_oep_offscreen_render_target_target" will be available
+# if option "USE_BNB_OEP_CAMERA" is ON ->                   target "bnb_oep_camera_target" will be available
+# by default all options are ON
+option(USE_BNB_OEP_PIXEL_BUFFER "Use bnb pixel_buffer implementation" ON)
+option(USE_BNB_OEP_IMAGE_PROCESSING_RESULT "Use bnb image_processing_result implementation" ON)
+option(USE_BNB_OEP_OFFSCREEN_EFFECT_PLAYER "Use bnb offscreen_effect_player implementation" ON)
+option(USE_BNB_OEP_OFFSCREEN_RENDER_TARGET "Use bnb offscreen_render_target implementation" ON)
+option(USE_BNB_OEP_CAMERA "Use bnb camera implementation" ON)
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/libyuv.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
+set(OEP_SUBMODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libraries)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/offscreen_effect_player)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/offscreen_render_target)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/preprocessor)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/camera)
+
+# only offscreen_render_target used OpenGL
+if (USE_BNB_OEP_OFFSCREEN_RENDER_TARGET)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/opengl)
+endif()
