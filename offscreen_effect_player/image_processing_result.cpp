@@ -59,7 +59,7 @@ namespace bnb::oep
 
         /* Since offscreen_render_target may not be able to read some implementations of
         formats, we first read the format that is needed */
-        /* In the current implementation of the offscreen_render_target - has hardware support for 
+        /* In the current implementation of the offscreen_render_target - has hardware support for
         converting to i420. It's better because works faster. */
         pixel_buffer_sptr image = m_ort->read_current_buffer(format);
 

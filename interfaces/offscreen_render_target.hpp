@@ -97,7 +97,7 @@ namespace bnb::oep::interfaces
         virtual void orient_image(rotation orient) = 0;
 
         /**
-         * Reading current buffer of active texture. 
+         * Reading current buffer of active texture.
          * The implementation must definitely support for reading format image_format::bpc8_rgba
          * Called by image_processing_result
          *
