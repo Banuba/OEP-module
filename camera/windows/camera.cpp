@@ -57,8 +57,8 @@ namespace bnb::oep
 
                 using ns = bnb::oep::interfaces::pixel_buffer;
                 ns::plane_data y_plane{std::shared_ptr<uint8_t>(y_plane_data, [lock](uint8_t*) { /* do nothing */ }), 0, static_cast<int32_t>(surface_stride)};
-                ns::plane_data u_plane{std::shared_ptr<uint8_t>(u_plane_data, [lock](uint8_t*) { /* do nothing */ }), 0, static_cast<int32_t>(surface_stride)};
-                ns::plane_data v_plane{std::shared_ptr<uint8_t>(v_plane_data, [lock](uint8_t*) { /* do nothing */ }), 0, static_cast<int32_t>(surface_stride)};
+                ns::plane_data u_plane{std::shared_ptr<uint8_t>(u_plane_data, [lock](uint8_t*) { /* do nothing */ }), 0, static_cast<int32_t>(surface_stride / 2)};
+                ns::plane_data v_plane{std::shared_ptr<uint8_t>(v_plane_data, [lock](uint8_t*) { /* do nothing */ }), 0, static_cast<int32_t>(surface_stride / 2)};
                 std::vector<ns::plane_data> planes{y_plane, u_plane, v_plane};
 
                 img = ns::create(planes, bnb::oep::interfaces::image_format::i420_bt709_full, camera_width, camera_hight);
