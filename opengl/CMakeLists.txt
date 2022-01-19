@@ -5,7 +5,7 @@ file(GLOB_RECURSE bnb_oep_opengl_program_srcs
 )
 add_library(bnb_oep_opengl_program_target STATIC ${bnb_oep_opengl_program_srcs})
 target_include_directories(bnb_oep_opengl_program_target PUBLIC ${OEP_SUBMODULE_DIR})
-target_link_libraries(bnb_oep_opengl_program_target glad)
+target_link_libraries(bnb_oep_opengl_program_target GLESv3)
 
 # TARGET bnb_oep_opengl_yuv_converter_target
 file(GLOB_RECURSE bnb_oep_opengl_yuv_converter_srcs
