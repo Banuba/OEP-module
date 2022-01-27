@@ -117,6 +117,17 @@ namespace bnb::oep::interfaces
          * @example draw()
          */
         virtual void draw() = 0;
+
+        /**
+         * Needed for METAL only
+         * Set the render surface for the effect player.
+         * Must be called from the render thread
+         *
+         * @param layer BNBCopyableMetalLayer* from offscreen_render_target
+         *
+         * @example set_render_surface(layer)
+         */
+        virtual void set_render_surface(void* layer) = 0;
     }; /* class effect_player   INTERFACE */
 
 } /* namespace bnb::oep::interfaces */
