@@ -11,7 +11,12 @@ if (USE_BNB_OEP_IMAGE_PROCESSING_RESULT)
     add_library(bnb_oep_image_processing_result_target STATIC ${bnb_oep_image_processing_result_target_srcs})
     target_include_directories(bnb_oep_image_processing_result_target SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
     target_include_directories(bnb_oep_image_processing_result_target PUBLIC ${OEP_SUBMODULE_DIR})
-    target_link_libraries(bnb_oep_image_processing_result_target yuv)
+    add_dependencies(bnb_oep_image_processing_result_target yuv)
+    target_link_libraries(bnb_oep_image_processing_result_target PUBLIC yuv)
+    # We have to link yuv manually because there is no linkage step for static libraries
+    if(APPLE)
+        set_target_properties(bnb_oep_image_processing_result_target PROPERTIES XCODE_ATTRIBUTE_OTHER_LIBTOOLFLAGS "-lyuv -L$<TARGET_FILE_DIR:yuv>")
+    endif()
 endif()
 
 
