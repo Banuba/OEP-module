@@ -118,6 +118,7 @@ namespace bnb::oep::interfaces
          */
         virtual void draw() = 0;
 
+        #ifdef USE_METAL
         /**
          * Needed for METAL only
          * Set the render surface for the effect player.
@@ -128,6 +129,7 @@ namespace bnb::oep::interfaces
          * @example set_render_surface(layer)
          */
         virtual void set_render_surface(void* layer) = 0;
+        #endif
     }; /* class effect_player   INTERFACE */
 
 } /* namespace bnb::oep::interfaces */

@@ -24,7 +24,11 @@ namespace bnb::oep
             m_ort->init(width, height);
             m_ort->activate_context();
             m_ep->surface_created(width, height);
+
+            #ifdef USE_METAL
             m_ep->set_render_surface(m_ort->get_layer());
+            #endif
+
             /* Only necessary if we want share context via GLFW on Windows */
             m_ort->deactivate_context();
         };
@@ -44,7 +48,7 @@ namespace bnb::oep
     /* offscreen_effect_player::~offscreen_effect_player */
     offscreen_effect_player::~offscreen_effect_player()
     {
-        // Switches playback state to inactive state and deinitializes offscreen render target.
+        // Switches effect player to inactive state and deinitializes offscreen render target.
         // Must be performed on render thread.
         auto task = [this]() {
             m_ep->surface_destroyed();

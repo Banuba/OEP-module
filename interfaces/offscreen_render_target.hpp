@@ -121,6 +121,7 @@ namespace bnb::oep::interfaces
          */
         virtual rendered_texture_t get_current_buffer_texture() = 0;
 
+        #ifdef USE_METAL
         /**
          * Needed for METAL only
          * Get BNBCopyableMetalLayer* used as render surface for the effect_player
@@ -131,6 +132,7 @@ namespace bnb::oep::interfaces
          * @example get_layer()
          */
         virtual void* get_layer() = 0;
+        #endif
     }; /* class offscreen_render_target         INTERFACE */
 
 } /* namespace bnb::oep::interfaces */
