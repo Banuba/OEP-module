@@ -24,11 +24,6 @@ namespace bnb::oep
             m_ort->init(width, height);
             m_ort->activate_context();
             m_ep->surface_created(width, height);
-
-            #ifdef USE_METAL
-            m_ep->set_render_surface(m_ort->get_layer());
-            #endif
-
             /* Only necessary if we want share context via GLFW on Windows */
             m_ort->deactivate_context();
         };
