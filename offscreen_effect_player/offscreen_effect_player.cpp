@@ -2,13 +2,28 @@
 
 #include <iostream>
 
+#ifdef USE_METAL
+#include "../m_interfaces/offscreen_render_target.hpp"
+#include "../m_interfaces/effect_player.hpp"
+#endif
+
 namespace bnb::oep
 {
 
     /* offscreen_effect_player::create  STATIC INTERFACE */
     offscreen_effect_player_sptr bnb::oep::interfaces::offscreen_effect_player::create(effect_player_sptr ep, offscreen_render_target_sptr ort, int32_t width, int32_t height)
     {
-        return std::make_shared<bnb::oep::offscreen_effect_player>(ep, ort, width, height);
+        auto oep = std::make_shared<bnb::oep::offscreen_effect_player>(ep, ort, width, height);
+#ifdef USE_METAL
+        auto metal_ep = std::dynamic_pointer_cast<bnb::oep::metal_support::effect_player>(ep);
+        auto metal_ort = std::dynamic_pointer_cast<bnb::oep::metal_support::offscreen_render_target>(ort);
+        if (metal_ep && metal_ort){
+            metal_ep->set_render_surface(metal_ort->get_layer());
+        } else {
+            std::cout << "[ERROR] Effect_player or offscreen_render_target are not suitable for use with METAL" << std::endl;
+        }
+#endif
+        return oep;
     }
 
     /* offscreen_effect_player::offscreen_effect_player */
