@@ -229,7 +229,6 @@ bnb::oep::camera::~camera()
 {
     if (m_impl->wrapped != nullptr) {
         [m_impl->wrapped stop];
-        [m_impl->wrapped release];
     }
 }
 

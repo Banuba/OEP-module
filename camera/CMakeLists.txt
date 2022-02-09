@@ -10,6 +10,9 @@ if (USE_BNB_OEP_CAMERA)
             ${CMAKE_CURRENT_LIST_DIR}/macos/*.hpp
             ${CMAKE_CURRENT_LIST_DIR}/macos/*.mm
         )
+
+        set_target_properties(bnb_oep_camera_target PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC "YES")
+
         target_sources(bnb_oep_camera_target PUBLIC ${apple_srcs})
         target_link_libraries(bnb_oep_camera_target
             "-framework AVFoundation"
