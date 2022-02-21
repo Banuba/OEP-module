@@ -67,8 +67,8 @@ namespace bnb::oep::converter
 
 
     /* yuv_converter::yuv_converter */
-    yuv_converter::yuv_converter(standard st, range rng, rotation rot, bool vertical_flip)
-        : m_shader(nullptr, shader_vec_prog, shader_frag_prog)
+    yuv_converter::yuv_converter(standard st, range rng, rotation rot, bool vertical_flip, store_specific store_type)
+        : store_type(store_type), m_shader(nullptr, shader_vec_prog, shader_frag_prog)
     {
         constexpr const int drawing_plane_count = 8;
         constexpr const int drawing_plane_coords_per_vert = 5;
@@ -221,7 +221,14 @@ namespace bnb::oep::converter
             m_width = width;
             m_height = height;
             delete_framebuffer(m_fbo);
-            m_fbo = create_framebuffer(stride / 4, m_height + half_height);
+            switch (store_type) {
+                case store_specific::webrtc_specific:
+                    m_fbo = create_framebuffer(stride / 4, m_height + half_height);
+                    break;
+                case store_specific::yuv_specific:
+                    m_fbo = create_framebuffer(stride / 4, m_height + half_height * 2);
+                    break;
+            }
             update_pixel_steps();
         }
 
@@ -263,7 +270,14 @@ namespace bnb::oep::converter
         glViewport(0, m_height, half_viewport_width, half_height);
         glDrawArrays(GL_TRIANGLE_STRIP, m_draw_indent, drawing_plane_vert_count);
         m_shader.set_uniform("plane_coef", m_v_plane_coefs[0], m_v_plane_coefs[1], m_v_plane_coefs[2], m_v_plane_coefs[3]);
-        glViewport(half_viewport_width, m_height, half_viewport_width, half_height);
+        switch (store_type) {
+            case store_specific::webrtc_specific:
+                glViewport(half_viewport_width, m_height, half_viewport_width, half_height);
+                break;
+            case store_specific::yuv_specific:
+                glViewport(0, m_height + half_height, half_viewport_width, half_height);
+                break;
+        }
         glDrawArrays(GL_TRIANGLE_STRIP, m_draw_indent, drawing_plane_vert_count);
         /* and read all YUV planes data */
         glReadPixels(0, 0, m_fbo.width, m_fbo.height, GL_RGBA, GL_UNSIGNED_BYTE, output.data.get());
@@ -276,7 +290,14 @@ namespace bnb::oep::converter
 
         output.y_plane_data = output.data.get();
         output.u_plane_data = output.data.get() + stride * m_height;
-        output.v_plane_data = output.data.get() + stride * m_height + half_viewport_width * 4;
+        switch (store_type) {
+            case store_specific::webrtc_specific:
+                output.v_plane_data = output.data.get() + stride * m_height + half_viewport_width * 4;
+                break;
+            case store_specific::yuv_specific:
+                output.v_plane_data = output.data.get() + stride * m_height + stride * half_height;
+                break;
+        }
         output.y_plane_stride = stride;
         output.u_plane_stride = stride;
         output.v_plane_stride = stride;

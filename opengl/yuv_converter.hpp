@@ -38,6 +38,12 @@ namespace bnb::oep::converter
             deg_270 = 3
         };
 
+        enum class store_specific
+        {
+            webrtc_specific, /* U and V planes are stored interlaced */
+            yuv_specific /* Y, U and V planes stored sequentially */
+        };
+
         struct yuv_data
         {
             std::shared_ptr<uint8_t> data;
@@ -51,7 +57,7 @@ namespace bnb::oep::converter
         };
 
     public:
-        yuv_converter(standard st = standard::bt601, range rng = range::video_range, rotation rot = rotation::deg_0, bool vertical_flip = false);
+        yuv_converter(standard st = standard::bt601, range rng = range::video_range, rotation rot = rotation::deg_0, bool vertical_flip = false, store_specific store_type = store_specific::webrtc_specific);
         ~yuv_converter();
 
         void set_convert_standard(standard st, range rng);
@@ -87,6 +93,7 @@ namespace bnb::oep::converter
         float m_pixel_step_uv[2]{0.0f, 0.0f};
         rotation m_rotation{rotation::deg_0};
         bool m_vertical_flip{false};
+        store_specific store_type{store_specific::webrtc_specific};
         framebuffer m_fbo;
         program m_shader;
     };
