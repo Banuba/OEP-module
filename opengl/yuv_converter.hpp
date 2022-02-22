@@ -38,6 +38,42 @@ namespace bnb::oep::converter
             deg_270 = 3
         };
 
+        enum class yuv_data_layout
+        {
+            /* interlaced layout
+            * need memory: input_image_width * (input_image_height + input_image_height / 2)
+            * representation in memory:
+            * +---------------+
+            * |               |
+            * |       Y       |
+            * |     plane     |
+            * |               |
+            * +-------+-------+
+            * |   U   |   V   |
+            * | plane | plane |
+            * +-------+-------+
+            */
+            semi_planar_row_interleaved, /* U and V planes are stored interlaced */
+
+            /* consistent layout
+            * need memory: input_image_width * (input_image_height * 2)
+            * representation in memory:
+            * +---------------+
+            * |               |
+            * |       Y       |
+            * |     plane     |
+            * |               |
+            * +-------+-------+
+            * |   U   |       |
+            * | plane | unused|
+            * +-------+       |
+            * |   V   | memory|
+            * | plane |       |
+            * +-------+-------+
+            */
+            planar_layout  /* Y, U and V planes stored sequentially */
+        };
+
         struct yuv_data
         {
             std::shared_ptr<uint8_t> data;
@@ -51,7 +87,7 @@ namespace bnb::oep::converter
         };
 
     public:
-        yuv_converter(standard st = standard::bt601, range rng = range::video_range, rotation rot = rotation::deg_0, bool vertical_flip = false);
+        yuv_converter(standard st = standard::bt601, range rng = range::video_range, rotation rot = rotation::deg_0, bool vertical_flip = false, yuv_data_layout data_layout = yuv_data_layout::planar_layout);
         ~yuv_converter();
 
         void set_convert_standard(standard st, range rng);
@@ -87,6 +123,7 @@ namespace bnb::oep::converter
         float m_pixel_step_uv[2]{0.0f, 0.0f};
         rotation m_rotation{rotation::deg_0};
         bool m_vertical_flip{false};
+        yuv_data_layout data_layout{yuv_data_layout::planar_layout};
         framebuffer m_fbo;
         program m_shader;
     };
