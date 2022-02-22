@@ -43,9 +43,10 @@ namespace bnb::oep
     /* offscreen_effect_player::~offscreen_effect_player */
     offscreen_effect_player::~offscreen_effect_player()
     {
-        m_ep->surface_destroyed();
-        // Deinitialize offscreen render target, should be performed on render thread.
+        // Switches effect player to inactive state and deinitializes offscreen render target.
+        // Must be performed on render thread.
         auto task = [this]() {
+            m_ep->surface_destroyed();
             m_ort->deinit();
         };
         m_scheduler.enqueue(task).get();
