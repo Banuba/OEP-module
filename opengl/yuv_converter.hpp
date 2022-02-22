@@ -41,7 +41,7 @@ namespace bnb::oep::converter
         enum class yuv_data_layout
         {
             /* interlaced layout
-            * need memory: input_image_width * (input_image_height + input_image_height / 2)
+            * to get the minimum required memory size call function 'calc_min_yuv_data_size(width, height)'
             * representation in memory:
             * +---------------+
             * |               |
@@ -56,7 +56,7 @@ namespace bnb::oep::converter
             semi_planar_row_interleaved, /* U and V planes are stored interlaced */
 
             /* consistent layout
-            * need memory: input_image_width * (input_image_height * 2)
+            * to get the minimum required memory size call function 'calc_min_yuv_data_size(width, height)'
             * representation in memory:
             * +---------------+
             * |               |
@@ -95,6 +95,7 @@ namespace bnb::oep::converter
         void convert(uint32_t gl_texture, int width, int height, yuv_data& output);
         int get_width();
         int get_height();
+        size_t calc_min_yuv_data_size(int width, int height);
 
     private:
         struct framebuffer
@@ -123,7 +124,7 @@ namespace bnb::oep::converter
         float m_pixel_step_uv[2]{0.0f, 0.0f};
         rotation m_rotation{rotation::deg_0};
         bool m_vertical_flip{false};
-        yuv_data_layout data_layout{yuv_data_layout::planar_layout};
+        yuv_data_layout m_data_layout{yuv_data_layout::planar_layout};
         framebuffer m_fbo;
         program m_shader;
     };

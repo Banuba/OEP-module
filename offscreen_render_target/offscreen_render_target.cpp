@@ -370,7 +370,7 @@ namespace bnb::oep
         ns_cvt::yuv_data i420_planes_data;
         /* allocate needed memory for store */
         int32_t clamped_width = (m_width + 7) & ~7; /* alhoritm specific */
-        i420_planes_data.size = clamped_width * (m_height + (m_height + 1) / 2);
+        i420_planes_data.size = m_yuv_i420_converter->calc_min_yuv_data_size(m_width, m_height);
         i420_planes_data.data = std::shared_ptr<uint8_t>(new uint8_t[i420_planes_data.size], do_nothing_deleter_uint8);
 
         /* convert to i420 */
