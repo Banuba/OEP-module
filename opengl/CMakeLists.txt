@@ -1,11 +1,17 @@
 # TARGET bnb_oep_opengl_program_target
 file(GLOB_RECURSE bnb_oep_opengl_program_srcs
+    "${CMAKE_CURRENT_SOURCE_DIR}/opengl.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/program.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/program.hpp"
 )
 add_library(bnb_oep_opengl_program_target STATIC ${bnb_oep_opengl_program_srcs})
 target_include_directories(bnb_oep_opengl_program_target PUBLIC ${OEP_SUBMODULE_DIR})
-target_link_libraries(bnb_oep_opengl_program_target GLESv3)
+if(ANDROID)
+    target_compile_definitions(bnb_oep_opengl_program_target PUBLIC ANDROID_PLATFORM)
+    target_link_libraries(bnb_oep_opengl_program_target GLESv3)
+else()
+    target_link_libraries(bnb_oep_opengl_program_target glad)
+endif()
 
 # TARGET bnb_oep_opengl_yuv_converter_target
 file(GLOB_RECURSE bnb_oep_opengl_yuv_converter_srcs

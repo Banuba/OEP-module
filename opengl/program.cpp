@@ -2,8 +2,6 @@
 
 #include <sstream>
 
-#define BNB_GLSL_VERSION "#version 300 es \n"
-
 namespace bnb::oep
 {
 

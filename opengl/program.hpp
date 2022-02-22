@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <GLES3/gl3.h>
+#include "opengl.hpp"
 
 namespace bnb::oep
 {
@@ -30,6 +30,3 @@ namespace bnb::oep
     }; /* class bnb::oep::program */
 
 } /* namespace bnb::oep */
-
-#define GL_CHECK_ERROR() ((void) 0)
-#define GL_CALL(FUNC) [&]() {FUNC; GL_CHECK_ERROR(); }()
