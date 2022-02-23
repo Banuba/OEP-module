@@ -296,26 +296,24 @@ namespace bnb::oep
                 gl_format = GL_RGB;
                 break;
 
+#if defined(GL_BGR)
             case ns::bpc8_bgr:
-                if (GL_BGR == BNB_GL_UNSUPPORTED) {
-                    return nullptr;
-                }
                 pixel_size = 3;
                 gl_format = GL_BGR;
                 break;
+#endif /* defined(GL_BGR) */
 
             case ns::bpc8_rgba:
                 pixel_size = 4;
                 gl_format = GL_RGBA;
                 break;
 
+#if defined(GL_BGRA)
             case ns::bpc8_bgra:
-                if (GL_BGRA == BNB_GL_UNSUPPORTED) {
-                    return nullptr;
-                }
                 pixel_size = 4;
                 gl_format = GL_BGRA;
                 break;
+#endif /* defined(GL_BGRA) */
 
             default:
                 return nullptr;
