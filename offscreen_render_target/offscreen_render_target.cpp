@@ -295,18 +295,26 @@ namespace bnb::oep
                 pixel_size = 3;
                 gl_format = GL_RGB;
                 break;
+
+#if defined(GL_BGR)
             case ns::bpc8_bgr:
                 pixel_size = 3;
                 gl_format = GL_BGR;
                 break;
+#endif /* defined(GL_BGR) */
+
             case ns::bpc8_rgba:
                 pixel_size = 4;
                 gl_format = GL_RGBA;
                 break;
+
+#if defined(GL_BGRA)
             case ns::bpc8_bgra:
                 pixel_size = 4;
                 gl_format = GL_BGRA;
                 break;
+#endif /* defined(GL_BGRA) */
+
             default:
                 return nullptr;
         }
@@ -360,7 +368,7 @@ namespace bnb::oep
         ns_cvt::yuv_data i420_planes_data;
         /* allocate needed memory for store */
         int32_t clamped_width = (m_width + 7) & ~7; /* alhoritm specific */
-        i420_planes_data.size = clamped_width * (m_height + (m_height + 1) / 2);
+        i420_planes_data.size = m_yuv_i420_converter->calc_min_yuv_data_size(m_width, m_height);
         i420_planes_data.data = std::shared_ptr<uint8_t>(new uint8_t[i420_planes_data.size], do_nothing_deleter_uint8);
 
         /* convert to i420 */

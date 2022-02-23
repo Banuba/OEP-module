@@ -68,7 +68,7 @@ namespace bnb::oep::converter
 
     /* yuv_converter::yuv_converter */
     yuv_converter::yuv_converter(standard st, range rng, rotation rot, bool vertical_flip, yuv_data_layout data_layout)
-        : data_layout(data_layout), m_shader(nullptr, shader_vec_prog, shader_frag_prog)
+        : m_data_layout(data_layout), m_shader(nullptr, shader_vec_prog, shader_frag_prog)
     {
         constexpr const int drawing_plane_count = 8;
         constexpr const int drawing_plane_coords_per_vert = 5;
@@ -221,7 +221,7 @@ namespace bnb::oep::converter
             m_width = width;
             m_height = height;
             delete_framebuffer(m_fbo);
-            switch (data_layout) {
+            switch (m_data_layout) {
                 case yuv_data_layout::semi_planar_row_interleaved:
                     m_fbo = create_framebuffer(stride / 4, m_height + half_height);
                     break;
@@ -233,8 +233,8 @@ namespace bnb::oep::converter
         }
 
         /* allocate/reallocate memory if necessary */
-        if (output.data == nullptr || output.size < stride * m_fbo.height) {
-            output.size = stride * m_fbo.height;
+        if (output.data == nullptr || output.size < calc_min_yuv_data_size(width, height)) {
+            output.size = calc_min_yuv_data_size(width, height);
             output.data = std::shared_ptr<uint8_t>(new uint8_t[output.size], std::default_delete<uint8_t>());
         }
 
@@ -270,7 +270,7 @@ namespace bnb::oep::converter
         glViewport(0, m_height, half_viewport_width, half_height);
         glDrawArrays(GL_TRIANGLE_STRIP, m_draw_indent, drawing_plane_vert_count);
         m_shader.set_uniform("plane_coef", m_v_plane_coefs[0], m_v_plane_coefs[1], m_v_plane_coefs[2], m_v_plane_coefs[3]);
-        switch (data_layout) {
+        switch (m_data_layout) {
             case yuv_data_layout::semi_planar_row_interleaved:
                 glViewport(half_viewport_width, m_height, half_viewport_width, half_height);
                 break;
@@ -290,7 +290,7 @@ namespace bnb::oep::converter
 
         output.y_plane_data = output.data.get();
         output.u_plane_data = output.data.get() + stride * m_height;
-        switch (data_layout) {
+        switch (m_data_layout) {
             case yuv_data_layout::semi_planar_row_interleaved:
                 output.v_plane_data = output.data.get() + stride * m_height + half_viewport_width * 4;
                 break;
@@ -301,6 +301,18 @@ namespace bnb::oep::converter
         output.y_plane_stride = stride;
         output.u_plane_stride = stride;
         output.v_plane_stride = stride;
+    }
+
+    /* yuv_converter::calc_min_yuv_data_size */
+    size_t yuv_converter::calc_min_yuv_data_size(int width, int height)
+    {
+        auto stride = (width + 7) & ~7;
+        switch (m_data_layout) {
+            case yuv_data_layout::semi_planar_row_interleaved:
+                return stride * (height + (height + 1) / 2);
+            case yuv_data_layout::planar_layout:
+                return stride * ((height + 1) & ~1) * 2;
+        }
     }
 
     /* yuv_converter::update_pixel_steps */
