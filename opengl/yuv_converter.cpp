@@ -247,6 +247,9 @@ namespace bnb::oep::converter
         /* use shader and send texture matrix to shader program */
         m_shader.use();
 
+        /* In cases where blending was not turned off at the end of the effect */
+        glDisable(GL_BLEND);
+
         /* bind input texture */
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gl_texture);
