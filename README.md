@@ -17,7 +17,6 @@ The module implements interaction with the effect player. The module consists of
 - **offscreen_effect_player** - is a wrapper for effect_player. It allows you to use your own implementation for offscreen_render_target
 - **offscreen_render_target** - is an implementation option for the offscreen_render_target interface. Allows to prepare gl framebuffers and textures for receiving a frame from gpu, receive bytes of the processed frame from the gpu and pass them to the cpu, as well as, if necessary, set the orientation for the received frame. This implementation uses GLFW to work with gl context
 - **interfaces** - offscreen effect player interfaces
-- **camera** - generic camera module for desktop platforms (platform specific implementation)
 - **opengl** - OpenGL utilities
 
 ## Note
