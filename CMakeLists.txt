@@ -12,6 +12,7 @@ set(OEP_SUBMODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/offscreen_effect_player)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/offscreen_render_target)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third)
 
 # only offscreen_render_target used OpenGL
 if (USE_BNB_OEP_OFFSCREEN_RENDER_TARGET)

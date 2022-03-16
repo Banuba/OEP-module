@@ -54,6 +54,14 @@ LOCAL_SRC_FILES := \
     source/video_common.cc
 
 common_CFLAGS := -Wall -fexceptions
+ifneq ($(LIBYUV_DISABLE_JPEG), "yes")
+LOCAL_SRC_FILES += \
+    source/convert_jpeg.cc      \
+    source/mjpeg_decoder.cc     \
+    source/mjpeg_validate.cc
+common_CFLAGS += -DHAVE_JPEG
+LOCAL_SHARED_LIBRARIES := libjpeg
+endif
 
 LOCAL_CFLAGS += $(common_CFLAGS)
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
@@ -69,6 +77,9 @@ include $(CLEAR_VARS)
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libyuv_static
 LOCAL_MODULE := libyuv
+ifneq ($(LIBYUV_DISABLE_JPEG), "yes")
+LOCAL_SHARED_LIBRARIES := libjpeg
+endif
 
 include $(BUILD_SHARED_LIBRARY)
 
