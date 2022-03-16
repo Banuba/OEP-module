@@ -1,0 +1,4 @@
+[submodule "libyuv"]
+	path = third/libyuv
+	url = https://chromium.googlesource.com/libyuv/libyuv
+	branch = master
