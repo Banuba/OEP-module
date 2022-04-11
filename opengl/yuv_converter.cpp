@@ -51,6 +51,7 @@ namespace bnb::oep::converter
         "}\n";
 
     const char* shader_frag_prog =
+        "precision mediump float;\n"
         "layout (location = 0) out vec4 out_color;\n"
         "uniform vec2 pixel_step;\n"
         "uniform vec4 plane_coef;\n"
