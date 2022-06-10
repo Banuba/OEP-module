@@ -90,6 +90,13 @@ namespace bnb::oep::interfaces
         virtual void resume() = 0;
 
         /**
+         * Stop in effect player
+         *
+         * @example stop()
+         */
+        virtual void stop() = 0;
+
+        /**
          * Call js method defined in config.js file of active effect
          *
          * @param method JS function name. Member functions are not supported.

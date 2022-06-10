@@ -125,6 +125,12 @@ namespace bnb::oep
         m_ep->resume();
     }
 
+    /* offscreen_effect_player::resume */
+    void offscreen_effect_player::stop()
+    {
+        m_ep->stop();
+    }
+
     /* offscreen_effect_player::call_js_method */
     void offscreen_effect_player::call_js_method(const std::string& method, const std::string& param)
     {

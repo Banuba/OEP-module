@@ -27,6 +27,8 @@ namespace bnb::oep
 
         void resume() override;
 
+        void stop() override;
+
         void call_js_method(const std::string& method, const std::string& param) override;
 
     private:

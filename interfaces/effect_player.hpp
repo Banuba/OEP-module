@@ -99,6 +99,14 @@ namespace bnb::oep::interfaces
         virtual void resume() = 0;
 
         /**
+         * Stop playing. Called from offscreen effect player
+         * Must be called from the render thread
+         *
+         * @example stop();
+         */
+        virtual void stop() = 0;
+
+        /**
          * Push image to the effect player before calling draw() method. Called from offscreen effect player
          * Must be called from the render thread
          *
