@@ -46,6 +46,7 @@ namespace bnb::oep
         // Switches effect player to inactive state and deinitializes offscreen render target.
         // Must be performed on render thread.
         auto task = [this]() {
+            m_ort->activate_context();
             m_ep->surface_destroyed();
             m_ort->deinit();
         };
