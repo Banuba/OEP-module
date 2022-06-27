@@ -143,7 +143,8 @@ namespace bnb::oep
             uv_plane_data.get(),
             stride,
             image->get_width(),
-            image->get_height());
+            image->get_height()
+        );
 
         return bnb::oep::interfaces::pixel_buffer::create(planes, nv12_format, image->get_width(), image->get_height());
     }

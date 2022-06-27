@@ -9,6 +9,11 @@ namespace bnb::oep::interfaces
     class effect_player;
 }
 
+namespace bnb::interfaces
+{
+    class js_callback;
+}
+
 using effect_player_sptr = std::shared_ptr<bnb::oep::interfaces::effect_player>;
 
 namespace bnb::oep::interfaces
@@ -81,6 +86,13 @@ namespace bnb::oep::interfaces
          * @example call_js_method("just_bg", "{ 'recordDuration': 15, 'rotation_vector': true }")
          */
         virtual bool call_js_method(const std::string& method, const std::string& param) = 0;
+
+        /**
+         * Evaluate the `script` in effect. This method is thread safe.
+         * @param script JS string to execute
+         * @param result_callback Callback for result, will be called in render thread.
+         */
+        virtual bool eval_js(const std::string& script, const std::shared_ptr<bnb::interfaces::js_callback>& result_callback) = 0;
 
         /**
          * Pause playing. Called from offscreen effect player

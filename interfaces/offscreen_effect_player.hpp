@@ -105,6 +105,15 @@ namespace bnb::oep::interfaces
          * @example call_js_method("just_bg", "{ \"recordDuration\": 15, \"rotation_vector\": true }")
          */
         virtual void call_js_method(const std::string& method, const std::string& param) = 0;
+
+        /**
+         * * Evaluate the `script` in effect. This method is thread safe.
+         * @param script JS string to execute
+         * @param result_callback Callback for result, will be called in render thread.
+         *
+         * @example eval_js("script", result_callback)
+         */
+        virtual void eval_js(const std::string& script, const std::shared_ptr<bnb::interfaces::js_callback>& result_callback) = 0;
     }; /* class offscreen_effect_player     INTERFACE */
 
 } /* namespace bnb::oep::interfaces */

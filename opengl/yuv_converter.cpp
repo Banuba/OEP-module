@@ -69,7 +69,8 @@ namespace bnb::oep::converter
 
     /* yuv_converter::yuv_converter */
     yuv_converter::yuv_converter(standard st, range rng, rotation rot, bool vertical_flip, yuv_data_layout data_layout)
-        : m_data_layout(data_layout), m_shader(nullptr, shader_vec_prog, shader_frag_prog)
+        : m_data_layout(data_layout)
+        , m_shader(nullptr, shader_vec_prog, shader_frag_prog)
     {
         constexpr const int drawing_plane_count = 8;
         constexpr const int drawing_plane_coords_per_vert = 5;
@@ -370,7 +371,8 @@ namespace bnb::oep::converter
             put_error_message(
                 "create_framebuffer() error: glCheckFramebufferStatus(GL_FRAMEBUFFER)"
                 " != GL_FRAMEBUFFER_COMPLETE",
-                to_gl_check_framebuffer_status(e));
+                to_gl_check_framebuffer_status(e)
+            );
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return {fbo, tex, width, height};

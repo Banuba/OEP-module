@@ -9,7 +9,7 @@ namespace bnb::oep::interfaces
         deg90,  /* 90 degrees */
         deg180, /* 180 degrees */
         deg270, /* 270 degrees */
-    }; /* enum class rotation */
+    };          /* enum class rotation */
 
     /* bt601 and bt709 - two standards for representing color space that use the same
      * image encoding/decoding algorithm. Differ in the encoding / decoding coefficients.
@@ -29,6 +29,6 @@ namespace bnb::oep::interfaces
         i420_bt601_video, /* three planes: first RED, second RED, third RED */
         i420_bt709_full,  /* three planes: first RED, second RED, third RED */
         i420_bt709_video  /* three planes: first RED, second RED, third RED */
-    }; /* enum class image_format */
+    };                    /* enum class image_format */
 
 } /* namespace bnb::oep::interfaces */
