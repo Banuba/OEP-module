@@ -55,21 +55,21 @@ namespace bnb::oep
     }
 
     /* offscreen_effect_player::process_image_async */
-    void offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
+    void offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
     {
         if (!target_orientation.has_value()) {
             /* set default orientation */
             target_orientation = bnb::oep::interfaces::rotation::deg0;
         }
 
-        auto task = [this, image, callback, input_rotation, target_orientation]() {
+        auto task = [this, image, callback, input_rotation, require_mirroring, target_orientation]() {
             if (m_current_frame->is_locked()) {
                 std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
             } else if (m_incoming_frame_queue_task_count == 1) {
                 m_current_frame->lock();
                 m_ort->activate_context();
                 m_ort->prepare_rendering();
-                m_ep->push_frame(image, input_rotation);
+                m_ep->push_frame(image, input_rotation, require_mirroring);
                 m_ep->draw();
                 m_ort->orient_image(*target_orientation);
                 callback(m_current_frame);
