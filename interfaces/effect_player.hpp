@@ -88,7 +88,7 @@ namespace bnb::oep::interfaces
          * @param script JS string to execute
          * @param result_callback Callback for result, will be called in render thread.
          */
-        virtual void eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback) = 0;
+        virtual void eval_js(const std::string& script, const oep_eval_js_result_cb result_callback) = 0;
 
         /**
          * Pause playing. Called from offscreen effect player
