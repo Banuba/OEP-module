@@ -41,37 +41,37 @@ namespace bnb::oep::converter
         enum class yuv_data_layout
         {
             /* interlaced layout
-             * to get the minimum required memory size call function 'calc_min_yuv_data_size(width, height)'
-             * representation in memory:
-             * +---------------+
-             * |               |
-             * |       Y       |
-             * |     plane     |
-             * |               |
-             * +-------+-------+
-             * |   U   |   V   |
-             * | plane | plane |
-             * +-------+-------+
-             */
+            * to get the minimum required memory size call function 'calc_min_yuv_data_size(width, height)'
+            * representation in memory:
+            * +---------------+
+            * |               |
+            * |       Y       |
+            * |     plane     |
+            * |               |
+            * +-------+-------+
+            * |   U   |   V   |
+            * | plane | plane |
+            * +-------+-------+
+            */
             semi_planar_row_interleaved, /* U and V planes are stored interlaced */
 
             /* consistent layout
-             * to get the minimum required memory size call function 'calc_min_yuv_data_size(width, height)'
-             * representation in memory:
-             * +---------------+
-             * |               |
-             * |       Y       |
-             * |     plane     |
-             * |               |
-             * +-------+-------+
-             * |   U   |       |
-             * | plane | unused|
-             * +-------+       |
-             * |   V   | memory|
-             * | plane |       |
-             * +-------+-------+
-             */
-            planar_layout /* Y, U and V planes stored sequentially */
+            * to get the minimum required memory size call function 'calc_min_yuv_data_size(width, height)'
+            * representation in memory:
+            * +---------------+
+            * |               |
+            * |       Y       |
+            * |     plane     |
+            * |               |
+            * +-------+-------+
+            * |   U   |       |
+            * | plane | unused|
+            * +-------+       |
+            * |   V   | memory|
+            * | plane |       |
+            * +-------+-------+
+            */
+            planar_layout  /* Y, U and V planes stored sequentially */
         };
 
         struct yuv_data
