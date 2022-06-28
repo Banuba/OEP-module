@@ -111,9 +111,9 @@ namespace bnb::oep::interfaces
          * @param script JS string to execute
          * @param result_callback Callback for result, will be called in render thread.
          *
-         * @example eval_js("script", result_callback)
+         * @example eval_js("script", [](const std::string&){ DO SOMETHING })
          */
-        virtual void eval_js(const std::string& script, const oep_eval_js_result_cb_sptr result_callback) = 0;
+        virtual void eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback) = 0;
     }; /* class offscreen_effect_player     INTERFACE */
 
 } /* namespace bnb::oep::interfaces */
