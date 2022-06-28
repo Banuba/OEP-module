@@ -31,7 +31,7 @@ namespace bnb::oep
 
         void call_js_method(const std::string& method, const std::string& param) override;
 
-        void eval_js(const std::string& script, const std::shared_ptr<js_callback> result_callback) override;
+        void eval_js(const std::string& script, const oep_eval_js_result_cb_sptr result_callback) override;
 
     private:
         effect_player_sptr m_ep;
