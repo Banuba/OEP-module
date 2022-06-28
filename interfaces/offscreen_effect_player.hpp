@@ -113,7 +113,7 @@ namespace bnb::oep::interfaces
          *
          * @example eval_js("script", result_callback)
          */
-        virtual void eval_js(const std::string& script, const std::shared_ptr<bnb::interfaces::js_callback>& result_callback) = 0;
+        virtual void eval_js(const std::string& script, const std::shared_ptr<js_callback> result_callback) = 0;
     }; /* class offscreen_effect_player     INTERFACE */
 
 } /* namespace bnb::oep::interfaces */

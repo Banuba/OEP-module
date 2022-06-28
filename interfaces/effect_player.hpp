@@ -9,12 +9,8 @@ namespace bnb::oep::interfaces
     class effect_player;
 }
 
-namespace bnb::interfaces
-{
-    class js_callback;
-}
-
 using effect_player_sptr = std::shared_ptr<bnb::oep::interfaces::effect_player>;
+class js_callback;
 
 namespace bnb::oep::interfaces
 {
@@ -92,7 +88,7 @@ namespace bnb::oep::interfaces
          * @param script JS string to execute
          * @param result_callback Callback for result, will be called in render thread.
          */
-        virtual bool eval_js(const std::string& script, const std::shared_ptr<bnb::interfaces::js_callback>& result_callback) = 0;
+        virtual bool eval_js(const std::string& script, const std::shared_ptr<js_callback> result_callback) = 0;
 
         /**
          * Pause playing. Called from offscreen effect player
