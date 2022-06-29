@@ -15,7 +15,7 @@ namespace bnb::oep
 
         ~offscreen_effect_player();
 
-        void process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation) override;
+        void process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring, oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation) override;
 
         void surface_changed(int32_t width, int32_t height) override;
 

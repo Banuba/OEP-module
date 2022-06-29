@@ -113,9 +113,9 @@ namespace bnb::oep::interfaces
          * @param image input image for processing by the effect player
          * @param image_orientation input image orientation
          *
-         * @example push_frame(my_image, rotation::deg0);
+         * @example push_frame(my_image, rotation::deg0, false);
          */
-        virtual void push_frame(pixel_buffer_sptr image, rotation image_orientation) = 0;
+        virtual void push_frame(pixel_buffer_sptr image, rotation image_orientation, bool require_mirroring) = 0;
 
         /**
          * Start processing the image with the effect player and draw the image into the prepared texture.
