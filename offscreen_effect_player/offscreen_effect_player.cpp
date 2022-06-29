@@ -149,7 +149,7 @@ namespace bnb::oep
     {
         auto task = [this, script = script, callback = std::move(result_callback)]() {
             m_ort->activate_context();
-            m_ep->eval_js(script, callback);
+            m_ep->eval_js(script, std::move(callback));
             m_ort->deactivate_context();
         };
         m_scheduler.enqueue(task);
