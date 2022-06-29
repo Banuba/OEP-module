@@ -147,7 +147,7 @@ namespace bnb::oep
     /* offscreen_effect_player::eval_js */
     void offscreen_effect_player::eval_js(const std::string& script, oep_eval_js_result_cb result_callback)
     {
-        auto task = [this, script = script, callback = result_callback]() {
+        auto task = [this, script = script, callback = std::move(result_callback)]() {
             m_ort->activate_context();
             m_ep->eval_js(script, callback);
             m_ort->deactivate_context();
