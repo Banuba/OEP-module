@@ -10,6 +10,7 @@ namespace bnb::oep::interfaces
 }
 
 using effect_player_sptr = std::shared_ptr<bnb::oep::interfaces::effect_player>;
+using oep_eval_js_result_cb = std::function<void(const std::string&)>;
 
 namespace bnb::oep::interfaces
 {
@@ -81,6 +82,17 @@ namespace bnb::oep::interfaces
          * @example call_js_method("just_bg", "{ 'recordDuration': 15, 'rotation_vector': true }")
          */
         virtual bool call_js_method(const std::string& method, const std::string& param) = 0;
+
+        /**
+         * Evaluate the `script` in effect.
+         * This method is thread safe.
+         *
+         * @param script JS string to execute
+         * @param result_callback Callback for result. Must be called from the render thread
+         *
+         * @example eval_js("Skin.softening(1)", [] (const std::string & result) { DO_SOMETHING }")
+         */
+        virtual void eval_js(const std::string& script, oep_eval_js_result_cb result_callback) = 0;
 
         /**
          * Pause playing. Called from offscreen effect player
