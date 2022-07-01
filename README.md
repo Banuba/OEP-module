@@ -5,12 +5,12 @@
 # Table of Contents
 
 - [Abstract](#Abstract) 
-- [Module structure](#Module structure)
-- [Integration to the external application](#Integration to the external application)
-- [Interfaces interaction](#Interfaces interaction)
-- [Image processing](#Image processing)
-- [Backward compatibility](#Backward compatibility)
-- [References](#References)
+- [Module structure](#module_structure)
+- [Integration to the external application](#integration)
+- [Interfaces interaction](#interaction)
+- [Image processing](#processing)
+- [Backward compatibility](#compatibility)
+- [References](#references)
 
 
 ## Abstract
@@ -22,7 +22,7 @@ another should be implemented on the application side.
 
 This module is configurable, see CMakeLists.txt for details.
 
-## Module structure
+## Module structure <a name="module_structure"></a>
 
 Interfaces of EOP are declared in **interfaces**
 folder. 
@@ -67,7 +67,7 @@ Also  **thread_pool** class is used for multithreading:
 the thread_pool chooses a suitable thread
 for an asynchronous execution of every task in the task queue.
 
-## Integration to the external application
+## Integration to the external application <a name="integration"></a>
 
 To integrate the Offscreen effect player into your
 application, you need to do such the steps:
@@ -78,7 +78,7 @@ application, you need to do such the steps:
    different from the current implementation.
 
 
-## Interfaces interaction
+## Interfaces interaction <a name="interaction"></a>
 
 Interfaces interaction is shown in the diagram below. An arrow from A to B means 
 that interface B depends on interface A.
@@ -90,7 +90,7 @@ don't depend on other interfaces. Other interfaces depend on them,
 and OEP interface depends on all of the interfaces.
 
 
-## Image processing
+## Image processing <a name="processing"></a>
 
 For image processing method _offscreen_effect_player::process_image_async_ is used.
 This method has such parameters:
@@ -114,12 +114,12 @@ and rendering as it shown on the diagram below:
 ![](images/image_processing.jpg)
 
 
-## Backward compatibility
+## Backward compatibility <a name="compatibility"></a>
 
 Backward compatibility of sample in the case of the new SDK releases
 
 
-## References
+## References <a name="references"></a>
 
 [Banuba SDK Documentation](https://docs.banuba.com/face-ar-sdk/generated/doxygen/html/)
 
