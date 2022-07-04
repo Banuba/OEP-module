@@ -20,12 +20,12 @@ namespace bnb::oep::interfaces
     {
     public:
         /**
-         * Create the offscreen effecct player
+         * Create the offscreen effect player
          *
          * @param ep - shared pointer to the effect player
          * @param ort - shared pointer to the offscreen render target
-         * @param width - initial width for effect player and offscreen render target
-         * @param height - initial height for effect player and offscreen render target
+         * @param width - initial width for offscreen render target
+         * @param height - initial height for offscreen render target
          *
          * @return - shared pointer to the offscreen effect player
          *
