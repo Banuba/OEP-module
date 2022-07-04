@@ -21,14 +21,14 @@ namespace bnb::oep::interfaces
         /**
          * Create the effect player
          *
-         * @param path_to_resources the path where the effect player will find for resources
-         * @param client_token - banuba client token
+         * @param width - initial width for the effect player surface and the effect render buffer
+         * @param height - initial height for the effect player surface and the effect render buffer
          *
          * @return shared pointer to the effect player
          *
-         * @example bnb::oep::interfaces::effect_player::create(path_to_resources, klient_token)
+         * @example bnb::oep::interfaces::effect_player::create(width, height)
          */
-        static effect_player_sptr create(const std::vector<std::string>& path_to_resources, const std::string& client_token);
+        static effect_player_sptr create(int32_t width, int32_t height);
 
         virtual ~effect_player() = default;
 
