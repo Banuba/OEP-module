@@ -19,9 +19,9 @@ namespace bnb::oep
 
         void surface_changed(int32_t width, int32_t height) override;
 
-        void load_effect(const std::string& effect_path) override;
+        void load_effect(const std::string& effect_path, result_bool_cb result_callback) override;
 
-        void unload_effect() override;
+        void unload_effect(result_bool_cb result_callback) override;
 
         void pause() override;
 
@@ -29,7 +29,7 @@ namespace bnb::oep
 
         void stop() override;
 
-        void call_js_method(const std::string& method, const std::string& param) override;
+        void call_js_method(const std::string& method, const std::string& param, result_bool_cb result_callback) override;
 
         void eval_js(const std::string& script, oep_eval_js_result_cb result_callback) override;
 
