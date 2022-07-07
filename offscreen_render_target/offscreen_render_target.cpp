@@ -171,10 +171,6 @@ namespace bnb::oep
     {
         GL_CALL(glFlush());
 
-        if (orient == bnb::oep::interfaces::rotation::deg0) {
-            return;
-        }
-
         using ns = bnb::oep::interfaces::rotation;
         int32_t draw_indent{0};
         switch (orient) {
