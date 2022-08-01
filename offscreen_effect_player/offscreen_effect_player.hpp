@@ -8,6 +8,17 @@
 namespace bnb::oep
 {
 
+    struct process_image_async_data
+    {
+        pixel_buffer_sptr image;
+        bnb::oep::interfaces::rotation input_rotation;
+        bool require_mirroring;
+        oep_image_process_cb callback;
+        std::optional<bnb::oep::interfaces::rotation> target_orientation;
+    }; /* struct process_image_async_data */
+
+
+
     class offscreen_effect_player : public interfaces::offscreen_effect_player
     {
     public:
@@ -40,6 +51,8 @@ namespace bnb::oep
         std::thread::id render_thread_id;
         image_processing_result_sptr m_current_frame;
         std::atomic<uint16_t> m_incoming_frame_queue_task_count = 0;
+        process_image_async_data m_actual_process_data;
+        std::mutex m_actual_process_data_mtx;
     }; /* class offscreen_effect_player */
 
 } /* namespace bnb::oep */
