@@ -46,8 +46,9 @@ namespace bnb::oep::interfaces
          * @param target_orientation image orientation for postprocessing
          *
          * @example process_image_async(my_input_image, rotation::deg0, true, [](image_processing_result_sptr sptr){}, rotation::deg180)
+         * @return false if the frame is rejected because of too many items in the internal queue of frames, otherwise true
          */
-        virtual void process_image_async(pixel_buffer_sptr image, rotation input_rotation, bool require_mirroring, oep_image_process_cb callback, std::optional<rotation> target_orientation) = 0;
+        virtual bool process_image_async(pixel_buffer_sptr image, rotation input_rotation, bool require_mirroring, oep_image_process_cb callback, std::optional<rotation> target_orientation) = 0;
 
         /**
          * Notify about rendering surface being resized.

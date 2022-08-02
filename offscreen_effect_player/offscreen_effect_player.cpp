@@ -55,50 +55,40 @@ namespace bnb::oep
     }
 
     /* offscreen_effect_player::process_image_async */
-    void offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
+    bool offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
     {
         if (!target_orientation.has_value()) {
             /* set default orientation */
             target_orientation = bnb::oep::interfaces::rotation::deg0;
         }
 
-        if (m_incoming_frame_queue_task_count >= 5) {
-            callback(nullptr);
-            return;
-        }
-        {
-            std::lock_guard<std::mutex> lock(m_actual_process_data_mtx);
-            m_actual_process_data = {image, input_rotation, require_mirroring, callback, target_orientation};
+        constexpr int32_t incoming_frame_queue_task_max = 5;
+        if (m_incoming_frame_queue_task_count >= incoming_frame_queue_task_max) {
+            return false;
         }
 
-        auto task = [this]() {
+        auto task = [this, image, callback, input_rotation, require_mirroring, target_orientation]() {
             if (m_current_frame->is_locked()) {
                 std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
+            } else if (m_incoming_frame_queue_task_count == 1) {
+                m_current_frame->lock();
+                m_ort->activate_context();
+                m_ort->prepare_rendering();
+                m_ep->push_frame(image, input_rotation, require_mirroring);
+                m_ep->draw();
+                m_ort->orient_image(*target_orientation);
+                callback(m_current_frame);
+                m_ort->deactivate_context();
+                m_current_frame->unlock();
             } else {
-                process_image_async_data data;
-                {
-                    std::lock_guard<std::mutex> lock(m_actual_process_data_mtx);
-                    data = m_actual_process_data;
-                }
-                if (m_incoming_frame_queue_task_count == 1) {
-                    m_current_frame->lock();
-                    m_ort->activate_context();
-                    m_ort->prepare_rendering();
-                    m_ep->push_frame(data.image, data.input_rotation, data.require_mirroring);
-                    m_ep->draw();
-                    m_ort->orient_image(*data.target_orientation);
-                    data.callback(m_current_frame);
-                    m_ort->deactivate_context();
-                    m_current_frame->unlock();
-                } else {
-                    data.callback(nullptr);
-                }
+                callback(nullptr);
             }
             --m_incoming_frame_queue_task_count;
         };
 
         ++m_incoming_frame_queue_task_count;
         m_scheduler.enqueue(task);
+        return true;
     }
 
     /* offscreen_effect_player::surface_changed */
