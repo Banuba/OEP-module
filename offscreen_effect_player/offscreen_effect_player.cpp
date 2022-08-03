@@ -55,11 +55,16 @@ namespace bnb::oep
     }
 
     /* offscreen_effect_player::process_image_async */
-    void offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
+    bool offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
     {
         if (!target_orientation.has_value()) {
             /* set default orientation */
             target_orientation = bnb::oep::interfaces::rotation::deg0;
+        }
+
+        constexpr int32_t incoming_frame_queue_task_max = 5;
+        if (m_incoming_frame_queue_task_count >= incoming_frame_queue_task_max) {
+            return false;
         }
 
         auto task = [this, image, callback, input_rotation, require_mirroring, target_orientation]() {
@@ -83,6 +88,7 @@ namespace bnb::oep
 
         ++m_incoming_frame_queue_task_count;
         m_scheduler.enqueue(task);
+        return true;
     }
 
     /* offscreen_effect_player::surface_changed */
