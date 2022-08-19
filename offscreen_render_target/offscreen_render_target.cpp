@@ -196,7 +196,7 @@ namespace bnb::oep
                 break;
         }
 
-        if (m_swap_sizes != need_swap_sizes) {
+        if (m_swap_sizes != swap_sizes) {
             m_swap_sizes = swap_sizes;
             delete_postprocessing_texture();
         }
