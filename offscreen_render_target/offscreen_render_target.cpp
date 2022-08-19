@@ -6,28 +6,28 @@ namespace bnb::oep
     const int drawing_plane_count = 4;
     const int drawing_plane_coords_per_vert = 5;
     // clang-format off
-        static const float drawing_plane_coords[drawing_plane_coords_per_vert * drawing_plane_vert_count * drawing_plane_count] = {
-            /* verical flip 1 rotation 0deg */
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  /* top right */
-            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,  /* bottom right */
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* top left */
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* bottom left */
-            /* verical flip 1 rotation 90deg */
-            1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  /* top right */
-            1.0f,  1.0f, 0.0f, 0.0f, 1.0f,  /* bottom right */
-            -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* top left */
-            -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, /* bottom left */
-            /* verical flip 1 rotation 180deg */
-            1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  /* top right */
-            1.0f,  1.0f, 0.0f, 0.0f, 0.0f,  /* bottom right */
-            -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* top left */
-            -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, /* bottom left */
-            /* verical flip 1 rotation 270deg */
-            1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  /* top right */
-            1.0f,  1.0f, 0.0f, 1.0f, 0.0f,  /* bottom right */
-            -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* top left */
-            -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, /* bottom left */
-        };
+    static const float drawing_plane_coords[drawing_plane_coords_per_vert * drawing_plane_vert_count * drawing_plane_count] = {
+        /* verical flip 1 rotation 0deg */
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  /* top right */
+        1.0f,  1.0f, 0.0f, 1.0f, 1.0f,  /* bottom right */
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* top left */
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* bottom left */
+        /* verical flip 1 rotation 90deg */
+        1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  /* top right */
+        1.0f,  1.0f, 0.0f, 0.0f, 1.0f,  /* bottom right */
+        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* top left */
+        -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, /* bottom left */
+        /* verical flip 1 rotation 180deg */
+        1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  /* top right */
+        1.0f,  1.0f, 0.0f, 0.0f, 0.0f,  /* bottom right */
+        -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* top left */
+        -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, /* bottom left */
+        /* verical flip 1 rotation 270deg */
+        1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  /* top right */
+        1.0f,  1.0f, 0.0f, 1.0f, 0.0f,  /* bottom right */
+        -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* top left */
+        -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, /* bottom left */
+    };
     // clang-format on
 
     const char* shader_vec_prog =
@@ -121,7 +121,7 @@ namespace bnb::oep
                 m_post_processing_framebuffer = 0;
             }
             delete_textures();
-            deactivate_context();
+            m_rc->delete_context();
         });
     }
 
@@ -130,6 +130,7 @@ namespace bnb::oep
     {
         m_width = width;
         m_height = height;
+        m_swap_sizes = false;
         activate_context();
         delete_textures();
         deactivate_context();
@@ -151,7 +152,7 @@ namespace bnb::oep
     void offscreen_render_target::prepare_rendering()
     {
         if (m_offscreen_render_texture == 0) {
-            generate_texture(m_offscreen_render_texture);
+            generate_texture(m_offscreen_render_texture, m_width, m_height);
         }
 
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer));
@@ -173,21 +174,31 @@ namespace bnb::oep
 
         using ns = bnb::oep::interfaces::rotation;
         int32_t draw_indent{0};
+        bool swap_sizes = m_swap_sizes;
         switch (orient) {
             case ns::deg0:
                 draw_indent = 0 * drawing_plane_vert_count;
+                swap_sizes = false;
                 break;
             case ns::deg90:
                 draw_indent = 1 * drawing_plane_vert_count;
+                swap_sizes = true;
                 break;
             case ns::deg180:
                 draw_indent = 2 * drawing_plane_vert_count;
+                swap_sizes = false;
                 break;
             case ns::deg270:
                 draw_indent = 3 * drawing_plane_vert_count;
+                swap_sizes = true;
                 break;
             default:
                 break;
+        }
+
+        if (m_swap_sizes != need_swap_sizes) {
+            m_swap_sizes = swap_sizes;
+            delete_postprocessing_texture();
         }
 
         prepare_post_processing_rendering();
@@ -232,11 +243,11 @@ namespace bnb::oep
     }
 
     /* offscreen_render_target::generate_texture */
-    void offscreen_render_target::generate_texture(GLuint& texture)
+    void offscreen_render_target::generate_texture(GLuint& texture, int32_t width, int32_t height)
     {
         GL_CALL(glGenTextures(1, &texture));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
 
         GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MIN_FILTER), GL_NEAREST));
         GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MAG_FILTER), GL_NEAREST));
@@ -251,6 +262,11 @@ namespace bnb::oep
             GL_CALL(glDeleteTextures(1, &m_offscreen_render_texture));
             m_offscreen_render_texture = 0;
         }
+        delete_postprocessing_texture();
+    }
+
+    /* offscreen_render_target::delete_postprocessing_texture */
+    void offscreen_render_target::delete_postprocessing_texture() {
         if (m_offscreen_post_processuing_render_texture != 0) {
             GL_CALL(glDeleteTextures(1, &m_offscreen_post_processuing_render_texture));
             m_offscreen_post_processuing_render_texture = 0;
@@ -260,8 +276,10 @@ namespace bnb::oep
     /* offscreen_render_target::prepare_post_processing_rendering */
     void offscreen_render_target::prepare_post_processing_rendering()
     {
+        int32_t width = m_swap_sizes ? m_height : m_width;
+        int32_t height = m_swap_sizes ? m_width : m_height;
         if (m_offscreen_post_processuing_render_texture == 0) {
-            generate_texture(m_offscreen_post_processuing_render_texture);
+            generate_texture(m_offscreen_post_processuing_render_texture, width, height);
         }
         GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_post_processing_framebuffer));
         GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_offscreen_post_processuing_render_texture, 0));
@@ -272,7 +290,7 @@ namespace bnb::oep
             return;
         }
 
-        GL_CALL(glViewport(0, 0, GLsizei(m_width), GLsizei(m_height)));
+        GL_CALL(glViewport(0, 0, GLsizei(width), GLsizei(height)));
 
         GL_CALL(glActiveTexture(GLenum(GL_TEXTURE0)));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_offscreen_render_texture));
@@ -283,6 +301,8 @@ namespace bnb::oep
     /* offscreen_render_target::read_current_buffer_bpc8 */
     pixel_buffer_sptr offscreen_render_target::read_current_buffer_bpc8(bnb::oep::interfaces::image_format format_hint)
     {
+        int32_t width = m_swap_sizes ? m_height : m_width;
+        int32_t height = m_swap_sizes ? m_width : m_height;
         using ns = bnb::oep::interfaces::image_format;
         int32_t pixel_size{0};
         GLenum gl_format{0};
@@ -315,21 +335,23 @@ namespace bnb::oep
                 return nullptr;
         }
 
-        size_t size = m_width * m_height * 4;
+        size_t size = width * height * 4;
         auto plane_storage = std::shared_ptr<uint8_t>(new uint8_t[size]);
-        bnb::oep::interfaces::pixel_buffer::plane_data bpc8_plane{plane_storage, size, m_width * 4};
+        bnb::oep::interfaces::pixel_buffer::plane_data bpc8_plane{plane_storage, size, width * 4};
 
         glBindFramebuffer(GL_FRAMEBUFFER, m_last_framebuffer);
-        GL_CALL(glReadPixels(0, 0, m_width, m_height, gl_format, GL_UNSIGNED_BYTE, plane_storage.get()));
+        GL_CALL(glReadPixels(0, 0, width, height, gl_format, GL_UNSIGNED_BYTE, plane_storage.get()));
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         std::vector<bnb::oep::interfaces::pixel_buffer::plane_data> planes{bpc8_plane};
-        return bnb::oep::interfaces::pixel_buffer::create(planes, format_hint, m_width, m_height);
+        return bnb::oep::interfaces::pixel_buffer::create(planes, format_hint, width, height);
     }
 
     /* offscreen_render_target::read_current_buffer_i420 */
     pixel_buffer_sptr offscreen_render_target::read_current_buffer_i420(bnb::oep::interfaces::image_format format_hint)
     {
+        int32_t width = m_swap_sizes ? m_height : m_width;
+        int32_t height = m_swap_sizes ? m_width : m_height;
         using ns = bnb::oep::interfaces::image_format;
         using ns_cvt = bnb::oep::converter::yuv_converter;
         ns_cvt::standard std{ns_cvt::standard::bt601};
@@ -363,13 +385,13 @@ namespace bnb::oep
 
         ns_cvt::yuv_data i420_planes_data;
         /* allocate needed memory for store */
-        int32_t clamped_width = (m_width + 7) & ~7; /* alhoritm specific */
-        i420_planes_data.size = m_yuv_i420_converter->calc_min_yuv_data_size(m_width, m_height);
+        int32_t clamped_width = (width + 7) & ~7; /* alhoritm specific */
+        i420_planes_data.size = m_yuv_i420_converter->calc_min_yuv_data_size(width, height);
         i420_planes_data.data = std::shared_ptr<uint8_t>(new uint8_t[i420_planes_data.size], do_nothing_deleter_uint8);
 
         /* convert to i420 */
         uint32_t gl_texture = static_cast<uint32_t>(reinterpret_cast<uint64_t>(get_current_buffer_texture()));
-        m_yuv_i420_converter->convert(gl_texture, m_width, m_height, i420_planes_data);
+        m_yuv_i420_converter->convert(gl_texture, width, height, i420_planes_data);
 
         /* save data */
         using ns_pb = bnb::oep::interfaces::pixel_buffer;
@@ -386,7 +408,7 @@ namespace bnb::oep
 
         std::vector<ns_pb::plane_data> planes{y_plane, u_plane, v_plane};
 
-        return ns_pb::create(planes, format_hint, clamped_width, m_height, [default_deleter_uint8](auto* pb) { default_deleter_uint8(pb->get_base_sptr().get()); });
+        return ns_pb::create(planes, format_hint, clamped_width, height, [default_deleter_uint8](auto* pb) { default_deleter_uint8(pb->get_base_sptr().get()); });
     }
 
 } /* namespace bnb::oep */
