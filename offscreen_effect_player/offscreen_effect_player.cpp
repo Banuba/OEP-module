@@ -49,7 +49,6 @@ namespace bnb::oep
             m_ort->activate_context();
             m_ep->surface_destroyed();
             m_ort->deinit();
-            m_ort->deactivate_context();
         };
         m_scheduler.enqueue(task).get();
     }

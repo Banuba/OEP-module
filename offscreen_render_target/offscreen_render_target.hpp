@@ -35,14 +35,16 @@ namespace bnb::oep
         rendered_texture_t get_current_buffer_texture() override;
 
     private:
-        void generate_texture(GLuint& texture);
+        void generate_texture(GLuint& texture, int32_t width, int32_t height);
         void delete_textures();
+        void delete_postprocessing_texture();
         void prepare_post_processing_rendering();
         pixel_buffer_sptr read_current_buffer_bpc8(bnb::oep::interfaces::image_format format_hint);
         pixel_buffer_sptr read_current_buffer_i420(bnb::oep::interfaces::image_format format_hint);
 
     private:
         render_context_sptr m_rc;
+        bool m_swap_sizes{false};
         int32_t m_width{0};
         int32_t m_height{0};
 
