@@ -51,18 +51,26 @@ namespace bnb::oep
             m_ort->deinit();
             m_ort->deactivate_context();
         };
+        m_destroy = true;
         m_scheduler.enqueue(task).get();
     }
 
     /* offscreen_effect_player::process_image_async */
     void offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
     {
+        if (m_destroy) {
+            if (callback) {
+                callback(nullptr);
+            }
+            return;
+        }
+
         if (!target_orientation.has_value()) {
             /* set default orientation */
             target_orientation = bnb::oep::interfaces::rotation::deg0;
         }
 
-        auto task = [this, image, callback, input_rotation, require_mirroring, target_orientation]() {
+        auto task = [this, image, callback = (callback ? std::move(callback) : [](image_processing_result_sptr) {}), input_rotation, require_mirroring, target_orientation]() {
             if (m_current_frame->is_locked()) {
                 std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
             } else if (m_incoming_frame_queue_task_count == 1) {
@@ -70,10 +78,12 @@ namespace bnb::oep
                 m_ort->activate_context();
                 m_ort->prepare_rendering();
                 m_ep->push_frame(image, input_rotation, require_mirroring);
-                m_ep->draw();
-                m_ort->orient_image(*target_orientation);
-                callback(m_current_frame);
-                m_ort->deactivate_context();
+                if (m_ep->draw()) {
+                    m_ort->orient_image(*target_orientation);
+                    callback(m_current_frame);
+                } else {
+                    callback(nullptr);
+                }
                 m_current_frame->unlock();
             } else {
                 callback(nullptr);

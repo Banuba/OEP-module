@@ -134,9 +134,11 @@ namespace bnb::oep::interfaces
          * The image must be passed before the draw() method.
          * Must be called from the render thread
          *
+         * @return boolean indicating if rendering is successful or not. In rendering unsuccessful frame should be dropped. 
+         * 
          * @example draw()
          */
-        virtual void draw() = 0;
+        virtual bool draw() = 0;
     }; /* class effect_player   INTERFACE */
 
 } /* namespace bnb::oep::interfaces */
