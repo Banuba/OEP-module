@@ -61,7 +61,7 @@ namespace bnb::oep
             if (callback) {
                 callback(nullptr);
             }
-            return;
+            return false;
         }
 
         if (!target_orientation.has_value()) {
