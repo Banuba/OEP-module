@@ -1,4 +1,4 @@
-# [Offscreen Effect Player module (OEP-module)](https://docs.banuba.com/face-ar-sdk-v1/core/cpp_api_overview#offscreen-effect-player)
+# Offscreen Effect Player module (OEP-module)
 
 [Description of the **Offscreen Effect Player** on the Banuba SDK website](https://docs.banuba.com/face-ar-sdk-v1/core/cpp_api_overview#offscreen-effect-player)
 
@@ -9,15 +9,15 @@ Common submodule for projects integrating Banuba SDK using C++. This module is i
 ## Folders structure
 
 - [**docs**](./docs/) - illustrations with screenshots and images
-- [**interfaces**](./interfaces/) - offscreen effect player interfaces
-- [**offscreen_effect_player**](./offscreen_effect_player/) - contains the implementation of the **offscreen_effect_player**, **image_processing_result** and **pixel_buffer** intefaces. The implementation of **offscreen_effect_player** manages rendering via **ofscreen_render_target** interface and manages **effect_player**
-- [**offscreen_render_target**](./offscreen_render_target/) - is an implementation option for the **offscreen_render_target** interface. Allows to prepare gl framebuffers and textures for receiving a frame from gpu, receive bytes of the processed frame from the gpu and pass them to the cpu, as well as, if necessary, set the orientation for the received frame. This implementation uses GLFW to work with gl context
-- [**opengl**](./opengl/) - OpenGL utilities
+- [**interfaces**](./interfaces/) - contains the declaration of offscreen effect player
+- [**offscreen_effect_player**](./offscreen_effect_player/) - contains the implementation of the **offscreen_effect_player**, **image_processing_result** and **pixel_buffer** intefaces. The implementation of **offscreen_effect_player** manages the rendering via the **ofscreen_render_target** interface and manages **effect_player** providing the main API for image processing by the Banuba SDK.
+- [**offscreen_render_target**](./offscreen_render_target/) - contains the implementation for the **offscreen_render_target** interface. The purpose of this submodule is to provide and manage the graphical context for offscreen rendering. By default, implements OpenGL but can be overloaded on the application level to use other rendering engines. The current implementation is responsible for preparing OpenGL framebuffers and textures for rendering and frame postprocessing (the resulted image conversions and transformations).
+- [**opengl**](./opengl/) - OpenGL utilities used by **offscreen_render_target** interface implementation
 - [**third**](./third/) - third party libraries
 
 ## Description of interfaces
 
-The module consists of six main interfaces.
+The module by itself implements a piece of image processing conveyor: it accepts image for processing, confgures the offscreen rendering context, pass the image further to the main rendering engine - the Banuba SDK, and after provides the capabilities for image postprocessing. Based on this the module implements only some of the interfaces which do not introduce specifics of a particular API, e.g. Banuba SDK supports C++ API (link) and C API (link), the module doesn't know which API is used for the Banuba SDK management that is why effect_player interface is left unimplemented and its implementation is provided by the application.
 - [**effect_player**](./interfaces/effect_player.hpp) - abstraction over Banuba SDK. All interactions with Banuba SDK happen through this interface. Should be implemented on the application side
 - [**image_processing_result**](./interfaces/image_processing_result.hpp) - controls the processing for output image in the required format
 - [**offscreen_effect_player**](./interfaces/offscreen_effect_player.hpp) - connects all other interfaces into a single whole. The main interface through which the entire pipeline for processing a stream of frames goes.
