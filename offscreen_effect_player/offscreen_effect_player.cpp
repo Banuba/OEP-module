@@ -1,6 +1,7 @@
 #include "offscreen_effect_player.hpp"
 
 #include <iostream>
+#include <thread>
 
 namespace bnb::oep
 {
@@ -50,12 +51,20 @@ namespace bnb::oep
             m_ep->surface_destroyed();
             m_ort->deinit();
         };
+        m_destroy = true;
         m_scheduler.enqueue(task).get();
     }
 
     /* offscreen_effect_player::process_image_async */
     bool offscreen_effect_player::process_image_async(pixel_buffer_sptr image, bnb::oep::interfaces::rotation input_rotation, bool require_mirroring,  oep_image_process_cb callback, std::optional<bnb::oep::interfaces::rotation> target_orientation)
     {
+        if (m_destroy) {
+            if (callback) {
+                callback(nullptr);
+            }
+            return false;
+        }
+
         if (!target_orientation.has_value()) {
             /* set default orientation */
             target_orientation = bnb::oep::interfaces::rotation::deg0;
@@ -66,18 +75,24 @@ namespace bnb::oep
             return false;
         }
 
-        auto task = [this, image, callback, input_rotation, require_mirroring, target_orientation]() {
+        auto task = [this, image, callback = (callback ? std::move(callback) : [](image_processing_result_sptr) {}), input_rotation, require_mirroring, target_orientation]() {
             if (m_current_frame->is_locked()) {
                 std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
-            } else if (m_incoming_frame_queue_task_count == 1) {
+            } else if (m_incoming_frame_queue_task_count == 1 && !m_ep_stopped) {
                 m_current_frame->lock();
                 m_ort->activate_context();
                 m_ort->prepare_rendering();
                 m_ep->push_frame(image, input_rotation, require_mirroring);
-                m_ep->draw();
-                m_ort->orient_image(*target_orientation);
-                callback(m_current_frame);
-                m_ort->deactivate_context();
+                while(m_ep->draw() < 0 && !m_ep_stopped) {
+                    std::this_thread::yield();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
+                if (!m_ep_stopped) {
+                    m_ort->orient_image(*target_orientation);
+                    callback(m_current_frame);
+                } else {
+                    callback(nullptr);
+                }
                 m_current_frame->unlock();
             } else {
                 callback(nullptr);
@@ -123,18 +138,21 @@ namespace bnb::oep
     /* offscreen_effect_player::pause */
     void offscreen_effect_player::pause()
     {
+        m_ep_stopped = true;
         m_ep->pause();
     }
 
     /* offscreen_effect_player::resume */
     void offscreen_effect_player::resume()
     {
+        m_ep_stopped = false;
         m_ep->resume();
     }
 
     /* offscreen_effect_player::resume */
     void offscreen_effect_player::stop()
     {
+        m_ep_stopped = true;
         m_ep->stop();
     }
 

@@ -40,6 +40,8 @@ namespace bnb::oep
         std::thread::id render_thread_id;
         image_processing_result_sptr m_current_frame;
         std::atomic<uint16_t> m_incoming_frame_queue_task_count = 0;
+        std::atomic_bool m_destroy {false};
+        std::atomic_bool m_ep_stopped {false};
     }; /* class offscreen_effect_player */
 
 } /* namespace bnb::oep */
