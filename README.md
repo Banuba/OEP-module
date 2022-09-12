@@ -17,12 +17,12 @@ Common submodule for projects integrating Banuba SDK using C++. This module is i
 
 ## Description of interfaces
 
-The module by itself implements a piece of image processing conveyor: it accepts image for processing, confgures the offscreen rendering context, pass the image further to the main rendering engine - the Banuba SDK, and after provides the capabilities for image postprocessing. Based on this the module implements only some of the interfaces which do not introduce specifics of a particular API, e.g. Banuba SDK supports C++ API (link) and C API (link), the module doesn't know which API is used for the Banuba SDK management that is why effect_player interface is left unimplemented and its implementation is provided by the application.
+The module by itself implements a piece of image processing conveyor: it accepts image for processing, confgures the offscreen rendering context, pass the image further to the main rendering engine - the Banuba SDK, and after provides the capabilities for image postprocessing. Based on this the module implements only some of the interfaces which do not introduce specifics of a particular API, e.g. Banuba SDK supports [**C++ API**](https://docs.banuba.com/face-ar-sdk-v1/core/cpp_api_overview) and [**C API**](), the module doesn't know which API is used for the Banuba SDK management that is why effect_player interface is left unimplemented and its implementation is provided by the application.
 - [**effect_player**](./interfaces/effect_player.hpp) - abstraction over Banuba SDK. All interactions with Banuba SDK happen through this interface. Should be implemented on the application side
 - [**image_processing_result**](./interfaces/image_processing_result.hpp) - controls the processing for output image in the required format
 - [**offscreen_effect_player**](./interfaces/offscreen_effect_player.hpp) - connects all other interfaces into a single whole. The main interface through which the entire pipeline for processing a stream of frames goes.
 - [**offscreen_render_target**](./interfaces/offscreen_render_target.hpp) - creates and configures offscreen rendering with required rendering API
-- [**pixel_buffer**](./interfaces/pixel_buffer.hpp) - input and output pixel buffer (image). Contains an image in any of the supported formats: [RGB, RGBA, BGR, BGRA, ARGB, nv12, i420](./interfaces/image_format.hpp)
+- [**pixel_buffer**](./interfaces/pixel_buffer.hpp) - input and output pixel buffer. Contains an image in any of the supported formats: [RGB, RGBA, BGR, BGRA, ARGB, nv12, i420](./interfaces/image_format.hpp)
 - [**render_context**](./interfaces/render_context.hpp) - platform-specific rendering context. Should be implemented on the application side
 
 ## The scheme of interfaces interaction
@@ -53,8 +53,3 @@ All of the projects listed below have an implementation on the [**CPP-API**](htt
 - [quickstart-android-c-api](https://github.com/Banuba/quickstart-android-c-api) Android platform with using OpenGL and Banuba SDK c-API
 - [agora-plugin-filters-android](https://github.com/Banuba/agora-plugin-filters-android) Android platform with using OpenGL and Banuba SDK cpp-API
 - [OEP-macos](https://github.com/Banuba/OEP-macos) MacOS platform with using Metal and Banuba SDK cpp-API
-- [OEP_ios_c_api](https://github.com/sdk-banuba/OEP_ios_c_api) IOS platform with using OpenGL and Banuba SDK c-API
-
-## Backward compatibility
-
-If a new version of the Banuba SDK is released, backward compatibility is not guaranteed in full, but the logic of the module remains the same. And in 95 percent of cases, no change is required.
