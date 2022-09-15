@@ -7,38 +7,37 @@ namespace bnb::oep
     const int drawing_plane_coords_per_vert = 5;
     // clang-format off
     static const float drawing_plane_coords[drawing_plane_coords_per_vert * drawing_plane_vert_count * drawing_plane_count] = {
-        /* verical flip 1 rotation 0deg */
-        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  /* top right */
-        1.0f,  1.0f, 0.0f, 1.0f, 1.0f,  /* bottom right */
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* top left */
-        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* bottom left */
-        /* verical flip 1 rotation 90deg */
-        1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  /* top right */
-        1.0f,  1.0f, 0.0f, 0.0f, 1.0f,  /* bottom right */
-        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* top left */
-        -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, /* bottom left */
-        /* verical flip 1 rotation 180deg */
-        1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  /* top right */
-        1.0f,  1.0f, 0.0f, 0.0f, 0.0f,  /* bottom right */
-        -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* top left */
-        -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, /* bottom left */
-        /* verical flip 1 rotation 270deg */
-        1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  /* top right */
-        1.0f,  1.0f, 0.0f, 1.0f, 0.0f,  /* bottom right */
-        -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* top left */
-        -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, /* bottom left */
+        /* verical flip 0 rotation 0deg */
+        1.0f, 1.0f, 0.0f, 1.0f, 0.0f,  /* top right */
+        1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  /* bottom right */
+        -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, /* top left */
+        -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* bottom left */
+        /* verical flip 0 rotation 90deg */
+        1.0f, 1.0f, 0.0f, 0.0f, 0.0f,  /* top right */
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  /* bottom right */
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, /* top left */
+        -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* bottom left */
+        /* verical flip 0 rotation 180deg */
+        1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  /* top right */
+        1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  /* bottom right */
+        -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, /* top left */
+        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* bottom left */
+        /* verical flip 0 rotation 270deg */
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  /* top right */
+        1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  /* bottom right */
+        -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, /* top left */
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* bottom left */
     };
     // clang-format on
 
     const char* shader_vec_prog =
-        " precision highp float; \n "
-        " layout (location = 0) in vec3 aPos; \n"
-        " layout (location = 1) in vec2 aTexCoord; \n"
+        "precision highp float;\n "
+        "layout (location = 0) in vec3 aPos;\n"
+        "layout (location = 1) in vec2 aTexCoord;\n"
         "out vec2 vTexCoord;\n"
-        "void main()\n"
-        "{\n"
-        " gl_Position = vec4(aPos, 1.0); \n"
-        " vTexCoord = aTexCoord; \n"
+        "void main() {\n"
+        "  gl_Position = vec4(aPos, 1.0);\n"
+        "  vTexCoord = aTexCoord;\n"
         "}\n";
 
     const char* shader_frag_prog =
@@ -46,9 +45,8 @@ namespace bnb::oep
         "in vec2 vTexCoord;\n"
         "out vec4 FragColor;\n"
         "uniform sampler2D uTexture;\n"
-        "void main()\n"
-        "{\n"
-        "FragColor = texture(uTexture, vTexCoord);\n"
+        "void main() {\n"
+        "  FragColor = texture(uTexture, vTexCoord);\n"
         "}\n";
 
     /* interfaces::offscreen_render_target::create */
@@ -206,6 +204,7 @@ namespace bnb::oep
         /* bind drawing geometry */
         glBindVertexArray(m_vao);
         glDrawArrays(GL_TRIANGLE_STRIP, draw_indent, drawing_plane_vert_count);
+        glBindVertexArray(0);
         m_shader->unuse();
 
         GL_CALL(glFlush());
