@@ -295,6 +295,7 @@ namespace bnb::oep
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_offscreen_render_texture));
         m_active_texture = m_offscreen_post_processuing_render_texture;
         m_last_framebuffer = m_post_processing_framebuffer;
+        GL_CALL(glDisable(GL_CULL_FACE));
     }
 
     /* offscreen_render_target::read_current_buffer_bpc8 */
