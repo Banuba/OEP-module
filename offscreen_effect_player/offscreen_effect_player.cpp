@@ -83,10 +83,9 @@ namespace bnb::oep
                 m_ort->activate_context();
                 m_ort->prepare_rendering();
                 m_ep->push_frame(image, input_rotation, require_mirroring);
-                while(m_ep->draw() < 0 && !m_ep_stopped) {
-                    std::this_thread::yield();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                }
+      
+                m_ep->draw();
+      
                 if (!m_ep_stopped) {
                     m_ort->orient_image(*target_orientation);
                     callback(m_current_frame);
