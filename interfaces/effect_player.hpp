@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <interfaces/render_context.hpp>
 #include <interfaces/pixel_buffer.hpp>
 
