@@ -118,20 +118,23 @@ namespace bnb::oep
     }
 
     /* offscreen_effect_player::load_effect */
-    void offscreen_effect_player::load_effect(const std::string& effect_path)
+    void offscreen_effect_player::load_effect(const std::string& effect_path, result_bool_cb result_callback)
     {
-        auto task = [this, effect = effect_path]() {
+        auto task = [this, effect = effect_path, cb = result_callback]() {
             m_ort->activate_context();
-            m_ep->load_effect(effect);
+            const auto res = m_ep->load_effect(effect);
             m_ort->deactivate_context();
+            cb(res);
         };
         m_scheduler.enqueue(task);
     }
 
     /* offscreen_effect_player::unload_effect */
-    void offscreen_effect_player::unload_effect()
+    void offscreen_effect_player::unload_effect(result_bool_cb result_callback)
     {
-        load_effect("");
+        load_effect( "", [cb = result_callback](bool res) {
+            cb( res );
+        } );
     }
 
     /* offscreen_effect_player::pause */
@@ -156,12 +159,13 @@ namespace bnb::oep
     }
 
     /* offscreen_effect_player::call_js_method */
-    void offscreen_effect_player::call_js_method(const std::string& method, const std::string& param)
+    void offscreen_effect_player::call_js_method(const std::string& method, const std::string& param, result_bool_cb result_callback)
     {
-        auto task = [this, method = method, param = param]() {
+        auto task = [this, method = method, param = param, cb = result_callback]() {
             m_ort->activate_context();
-            m_ep->call_js_method(method, param);
+            const auto res = m_ep->call_js_method(method, param);
             m_ort->deactivate_context();
+            cb( res );
         };
         m_scheduler.enqueue(task);
     }

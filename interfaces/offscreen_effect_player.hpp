@@ -12,6 +12,7 @@ namespace bnb::oep::interfaces
 
 using offscreen_effect_player_sptr = std::shared_ptr<bnb::oep::interfaces::offscreen_effect_player>;
 using oep_image_process_cb = std::function<void(image_processing_result_sptr)>;
+using result_bool_cb = std::function<void( bool )>;
 
 namespace bnb::oep::interfaces
 {
@@ -68,14 +69,14 @@ namespace bnb::oep::interfaces
          *
          * @example load_effect("effects/Afro")
          */
-        virtual void load_effect(const std::string& effect_path) = 0;
+        virtual void load_effect(const std::string& effect_path, result_bool_cb result_callback) = 0;
 
         /**
          * Unload effect from cache.
          *
          * @example unload_effect()
          */
-        virtual void unload_effect() = 0;
+        virtual void unload_effect(result_bool_cb result_callback) = 0;
 
         /**
          * Pause in effect player
@@ -106,7 +107,7 @@ namespace bnb::oep::interfaces
          *
          * @example call_js_method("just_bg", "{ \"recordDuration\": 15, \"rotation_vector\": true }")
          */
-        virtual void call_js_method(const std::string& method, const std::string& param) = 0;
+        virtual void call_js_method(const std::string& method, const std::string& param, result_bool_cb result_callback) = 0;
 
         /**
          * * Evaluate the `script` in effect. This method is thread safe.
